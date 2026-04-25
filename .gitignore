@@ -16,6 +16,9 @@ Thumbs.db
 *.pdf
 *_debug.png
 
+# Self-test screenshots (auto-generated)
+.self-test-screenshots/
+
 # Version directories (user generated)
 v*/
 versions/

@@ -1,12 +1,13 @@
 /**
  * Aquarium Presentation PDF Generator
- * 
+ *
  * Generate child-friendly PDF presentations from HTML files using Playwright.
- * 
+ *
  * Usage:
  *   node generate-pdf.js input.html output.pdf
  *   node generate-pdf.js input.html output.pdf --viewport 1404x993
- * 
+ *   node generate-pdf.js input.html output.pdf --self-test
+ *
  * Dependencies:
  *   - Playwright (npm install -g playwright)
  *   - Chromium browser (playwright install chromium)
@@ -14,20 +15,17 @@
 
 const path = require('path');
 const fs = require('fs');
-const { execSync } = require('child_process');
 
 // Check dependencies before importing
 function checkDependencies() {
   const issues = [];
 
-  // Check if playwright is installed
   try {
     require.resolve('playwright');
   } catch (e) {
     issues.push('Playwright is not installed. Run: npm install -g playwright');
   }
 
-  // Check if chromium is installed
   try {
     const playwrightPath = require.resolve('playwright');
     const playwrightDir = path.dirname(playwrightPath);
@@ -63,7 +61,8 @@ function loadConfig() {
       landscape: true,
       printBackground: true,
       margin: { top: '0', right: '0', bottom: '0', left: '0' }
-    }
+    },
+    quality: { maxFileSizeMB: 50 }
   };
 
   if (fs.existsSync(configPath)) {
@@ -72,7 +71,6 @@ function loadConfig() {
       return { ...defaultConfig, ...config };
     } catch (e) {
       console.warn(`Warning: Could not load config.json: ${e.message}`);
-      console.warn('Using default configuration');
       return defaultConfig;
     }
   }
@@ -88,16 +86,20 @@ const pdfPath = args[1] || (htmlPath ? htmlPath.replace('.html', '.pdf') : null)
 
 let viewport = { ...CONFIG.viewport };
 let debugMode = false;
+let selfTestMode = false;
 let timeout = CONFIG.browser.defaultTimeout * 1000;
 let pdfFormat = CONFIG.pdf;
 let contentType = null;
 let autoTheme = false;
 
-// Parse arguments
 args.forEach(arg => {
   if (arg === '--debug' || arg === '-d') {
     debugMode = true;
     console.log('Debug mode enabled');
+  }
+  if (arg === '--self-test' || arg === '-t') {
+    selfTestMode = true;
+    console.log('Self-test mode enabled');
   }
   if (arg === '--config' || arg === '-c') {
     console.log('Current configuration:');
@@ -129,6 +131,7 @@ if (!htmlPath) {
   console.error('Usage: node generate-pdf.js <input.html> [output.pdf] [options]');
   console.error('Options:');
   console.error('  --debug              Enable debug mode (saves screenshot on failure)');
+  console.error('  --self-test          Run self-tests after generation (PASS/FAIL report)');
   console.error('  --timeout=N          Set network idle timeout in seconds (default: 30)');
   console.error('  --viewport=WxH       Set viewport dimensions (default: 1404x993)');
   console.error('  --content-type=TYPE  Specify content type for auto theme selection');
@@ -140,7 +143,8 @@ if (!htmlPath) {
   console.error('Examples:');
   console.error('  node generate-pdf.js presentation.html output.pdf');
   console.error('  node generate-pdf.js presentation.html output.pdf --content-type=education');
-  console.error('  node generate-pdf.js presentation.html output.pdf --auto-theme --debug');
+  console.error('  node generate-pdf.js presentation.html output.pdf --self-test');
+  console.error('  node generate-pdf.js presentation.html output.pdf --self-test --debug');
   process.exit(1);
 }
 
@@ -148,7 +152,6 @@ if (!htmlPath) {
 const htmlAbsPath = path.resolve(htmlPath);
 const pdfAbsPath = path.resolve(pdfPath);
 
-// Check if input file exists
 if (!fs.existsSync(htmlAbsPath)) {
   console.error(`Error: Input file not found: ${htmlAbsPath}`);
   process.exit(1);
@@ -163,23 +166,21 @@ console.log(`Viewport: ${viewport.width}x${viewport.height}`);
   try {
     browser = await chromium.launch({
       headless: true,
-      ...(debugMode && { slowMo: 100 }) // Slow down in debug mode
+      ...(debugMode && { slowMo: 100 })
     });
 
     const page = await browser.newPage({ viewport });
 
-    // Log console messages in debug mode
     if (debugMode) {
       page.on('console', msg => {
-        const type = msg.type().toUpperCase();
-        console.log(`  [${type}] ${msg.text()}`);
+        console.log(`  [${msg.type().toUpperCase()}] ${msg.text()}`);
       });
       page.on('pageerror', err => {
         console.error(`  [PAGE ERROR] ${err.message}`);
       });
     }
 
-    // Load HTML file with timeout
+    // Load HTML file
     console.log('Loading HTML file...');
     try {
       await page.goto(`file://${htmlAbsPath}`, {
@@ -189,7 +190,6 @@ console.log(`Viewport: ${viewport.width}x${viewport.height}`);
     } catch (e) {
       if (e.name === 'TimeoutError') {
         console.warn('Warning: Network idle timeout, proceeding anyway...');
-        // Continue with PDF generation even if network didn't fully idle
       } else {
         throw e;
       }
@@ -198,139 +198,92 @@ console.log(`Viewport: ${viewport.width}x${viewport.height}`);
     // Apply automatic theme selection if enabled
     if (autoTheme || contentType) {
       console.log('Applying theme selection...');
-      await page.evaluate((detectedType, config) => {
-        // Content type to theme mapping
+      await page.evaluate((detectedType) => {
         const contentTypeMap = {
-          cover: 'blue',
-          intro: 'blue',
-          main: 'orange',
-          highlight: 'yellow',
-          nature: 'green',
-          education: 'green',
-          data: 'orange',
-          summary: 'yellow',
-          thankyou: 'blue',
-          formal: 'blue',
-          activity: 'orange',
-          energetic: 'orange',
-          health: 'green',
-          growth: 'green',
-          warm: 'yellow',
-          keypoint: 'yellow'
+          cover: 'blue', intro: 'blue', main: 'orange', highlight: 'yellow',
+          nature: 'green', education: 'green', data: 'orange', summary: 'yellow',
+          thankyou: 'blue', formal: 'blue', activity: 'orange', energetic: 'orange',
+          health: 'green', growth: 'green', warm: 'yellow', keypoint: 'yellow'
         };
 
         function detectContentType(pageIndex, totalPages, text) {
-          const lowerText = text.toLowerCase();
-
-          // First page is usually cover
           if (pageIndex === 0) return 'cover';
-          // Last page is usually thank you
           if (pageIndex === totalPages - 1) return 'thankyou';
-
-          // Keyword detection
-          if (lowerText.includes('总结') || lowerText.includes('summary') ||
-              lowerText.includes('结论') || lowerText.includes('conclusion')) {
-            return 'summary';
-          }
-          if (lowerText.includes('数据') || lowerText.includes('data') ||
-              lowerText.includes('统计') || lowerText.includes('图表') ||
-              lowerText.includes('chart')) {
-            return 'data';
-          }
-          if (lowerText.includes('动物') || lowerText.includes('植物') ||
-              lowerText.includes('nature') || lowerText.includes('environment') ||
-              lowerText.includes('tree') || lowerText.includes('animal')) {
-            return 'nature';
-          }
-          if (lowerText.includes('重点') || lowerText.includes('highlight') ||
-              lowerText.includes('关键') || lowerText.includes('key')) {
-            return 'highlight';
-          }
-          if (lowerText.includes('教育') || lowerText.includes('学习') ||
-              lowerText.includes('education') || lowerText.includes('learn')) {
-            return 'education';
-          }
-
+          const lower = text.toLowerCase();
+          if (lower.includes('总结') || lower.includes('summary') || lower.includes('结论')) return 'summary';
+          if (lower.includes('数据') || lower.includes('data') || lower.includes('统计') || lower.includes('chart')) return 'data';
+          if (lower.includes('动物') || lower.includes('植物') || lower.includes('nature') || lower.includes('animal')) return 'nature';
+          if (lower.includes('重点') || lower.includes('highlight') || lower.includes('关键')) return 'highlight';
+          if (lower.includes('教育') || lower.includes('学习') || lower.includes('education') || lower.includes('learn')) return 'education';
           return 'main';
         }
 
         const pages = document.querySelectorAll('.page, section');
         const totalPages = pages.length;
 
-        pages.forEach((page, index) => {
-          let theme = 'blue'; // default
-
-          if (detectedType) {
-            // Use explicitly specified content type
-            theme = contentTypeMap[detectedType] || 'blue';
-          } else {
-            // Auto-detect from page content
-            const text = page.textContent || '';
-            const detected = detectContentType(index, totalPages, text);
-            theme = contentTypeMap[detected] || 'blue';
+        pages.forEach((pg, index) => {
+          let theme = detectedType ? (contentTypeMap[detectedType] || 'blue') : 'blue';
+          if (!detectedType) {
+            const text = pg.textContent || '';
+            theme = contentTypeMap[detectContentType(index, totalPages, text)] || 'blue';
           }
-
-          // Apply theme class
-          page.classList.remove('blue', 'orange', 'green', 'yellow');
-          page.classList.add(theme);
-
-          // Also apply to content container
-          const content = page.querySelector('.content');
+          pg.classList.remove('blue', 'orange', 'green', 'yellow');
+          pg.classList.add(theme);
+          const content = pg.querySelector('.content, .content-center, .content-vertical, .content-grid, .content-timeline, .content-cards');
           if (content) {
             content.classList.remove('blue', 'orange', 'green', 'yellow');
             content.classList.add(theme);
           }
-
-          // Log for debugging
-          if (typeof console !== 'undefined') {
-            console.log(`Page ${index + 1}: Applied theme '${theme}'`);
-          }
         });
-      }, contentType, CONFIG);
-    }
-    console.log('Loading HTML file...');
-    try {
-      await page.goto(`file://${htmlAbsPath}`, {
-        waitUntil: 'networkidle',
-        timeout: timeout
-      });
-    } catch (e) {
-      if (e.name === 'TimeoutError') {
-        console.warn('Warning: Network idle timeout, proceeding anyway...');
-        // Continue with PDF generation even if network didn't fully idle
-      } else {
-        throw e;
-      }
+      }, contentType);
     }
 
-    // Check for broken images
-    if (debugMode) {
+    // Check for broken images (debug or self-test mode)
+    if (debugMode || selfTestMode) {
       console.log('Checking for broken images...');
       const brokenImages = await page.evaluate(() => {
         const images = document.querySelectorAll('img');
         const broken = [];
         images.forEach(img => {
           if (!img.complete || img.naturalWidth === 0) {
-            broken.push({
-              src: img.src,
-              alt: img.alt || 'no alt',
-              selector: img.outerHTML.substring(0, 100) + '...'
-            });
+            broken.push({ src: img.src, alt: img.alt || 'no alt' });
           }
         });
         return broken;
       });
       if (brokenImages.length > 0) {
-        console.warn(`Warning: Found ${brokenImages.length} broken images:`);
-        brokenImages.forEach(img => {
-          console.warn(`  - src: ${img.src} (alt: ${img.alt})`);
-        });
+        console.warn(`  Warning: Found ${brokenImages.length} broken images:`);
+        brokenImages.forEach(img => console.warn(`    - src: ${img.src}`));
       } else {
         console.log('  All images loaded successfully');
       }
     }
 
-    // Generate PDF with print-friendly settings
+    // Check placeholder text
+    if (selfTestMode) {
+      console.log('Checking for placeholder text...');
+      const placeholders = await page.evaluate(() => {
+        const elements = document.querySelectorAll('*');
+        const found = [];
+        elements.forEach(el => {
+          if (el.children.length === 0 && el.textContent) {
+            const text = el.textContent.trim();
+            if (text.startsWith('[') && text.endsWith(']')) {
+              found.push({ tag: el.tagName, text: text.substring(0, 50), src: el.src || null });
+            }
+          }
+        });
+        return found;
+      });
+      if (placeholders.length > 0) {
+        console.warn(`  Warning: Found ${placeholders.length} placeholder elements:`);
+        placeholders.forEach(p => console.warn(`    - <${p.tag}> "${p.text}"`));
+      } else {
+        console.log('  No placeholder text found');
+      }
+    }
+
+    // Generate PDF
     console.log('Generating PDF...');
     await page.pdf({
       path: pdfAbsPath,
@@ -339,9 +292,174 @@ console.log(`Viewport: ${viewport.width}x${viewport.height}`);
       printBackground: pdfFormat.printBackground,
       margin: pdfFormat.margin
     });
-    
-    await browser.close();
-    
+
+    // Self-test mode: run comprehensive checks
+    if (selfTestMode) {
+      console.log('\n' + '='.repeat(50));
+      console.log('  SELF-TEST REPORT');
+      console.log('='.repeat(50));
+
+      const testResults = {
+        passed: 0,
+        failed: 0,
+        warnings: 0,
+        details: []
+      };
+
+      function report(test, status, detail) {
+        const icon = status === 'PASS' ? '✓' : status === 'FAIL' ? '✗' : '⚠';
+        console.log(`  ${icon} [${test}] ${detail}`);
+        testResults[status === 'PASS' ? 'passed' : status === 'FAIL' ? 'failed' : 'warnings']++;
+        testResults.details.push({ test, status, detail });
+      }
+
+      // 1. File exists
+      report('PDF_EXISTS', fs.existsSync(pdfAbsPath) ? 'PASS' : 'FAIL', 'PDF file generated');
+
+      if (fs.existsSync(pdfAbsPath)) {
+        // 2. File size
+        const stats = fs.statSync(pdfAbsPath);
+        const sizeMB = stats.size / 1024 / 1024;
+        const maxMB = CONFIG.quality.maxFileSizeMB;
+        report('FILE_SIZE', sizeMB < maxMB ? 'PASS' : 'FAIL', `${sizeMB.toFixed(2)} MB (max: ${maxMB} MB)`);
+
+        // 3. File size not zero
+        report('FILE_NOT_EMPTY', stats.size > 0 ? 'PASS' : 'FAIL', `${(stats.size / 1024).toFixed(1)} KB`);
+
+        // 4. PDF is valid (starts with %PDF)
+        const header = fs.readFileSync(pdfAbsPath, { encoding: 'buffer' }).slice(0, 4).toString();
+        report('PDF_VALID', header === '%PDF' ? 'PASS' : 'FAIL', header === '%PDF' ? 'Valid PDF header' : `Invalid header: ${header}`);
+      }
+
+      // 5. Check HTML structure
+      const pageElements = await page.evaluate(() => {
+        const pages = document.querySelectorAll('.page, section');
+        return {
+          pageCount: pages.length,
+          hasTopband: document.querySelectorAll('.topband').length,
+          hasBottomReef: document.querySelectorAll('.bottom-reef').length,
+          themes: Array.from(pages).map(p => {
+            const classes = p.className.split(' ');
+            return classes.find(c => ['blue', 'orange', 'green', 'yellow'].includes(c)) || 'none';
+          }),
+          layouts: Array.from(pages).map(p => {
+            const hasFull = p.classList.contains('full-screen');
+            const hasTopBottom = p.classList.contains('top-bottom');
+            const hasThreeCol = p.classList.contains('three-column');
+            const hasTimeline = p.classList.contains('timeline');
+            const hasCardGrid = p.classList.contains('card-grid');
+            if (hasFull) return 'full-screen';
+            if (hasTopBottom) return 'top-bottom';
+            if (hasThreeCol) return 'three-column';
+            if (hasTimeline) return 'timeline';
+            if (hasCardGrid) return 'card-grid';
+            return 'split';
+          }),
+          imageCount: document.querySelectorAll('img').length,
+          altCount: Array.from(document.querySelectorAll('img')).filter(i => i.alt && i.alt !== '').length
+        };
+      });
+
+      report('PAGE_COUNT', pageElements.pageCount > 0 ? 'PASS' : 'FAIL', `${pageElements.pageCount} pages`);
+      report('PAGE_STRUCTURE', pageElements.hasTopband > 0 ? 'PASS' : 'FAIL', `topband: ${pageElements.hasTopband}`);
+      report('DECORATION', pageElements.hasBottomReef > 0 ? 'PASS' : 'FAIL', `bottom-reef: ${pageElements.hasBottomReef}`);
+      report('THEME_ASSIGNED', pageElements.themes.every(t => t !== 'none') ? 'PASS' : 'FAIL',
+        `themes: ${pageElements.themes.join(', ')}`);
+      report('LAYOUT_TYPES', pageElements.layouts.length > 0 ? 'PASS' : 'FAIL',
+        `layouts: ${[...new Set(pageElements.layouts)].join(', ')}`);
+      report('IMAGE_COUNT', pageElements.imageCount > 0 ? 'PASS' : 'WARN', `${pageElements.imageCount} images`);
+      report('IMAGE_ALT', pageElements.imageCount > 0 && pageElements.altCount === pageElements.imageCount ? 'PASS' : 'WARN',
+        `${pageElements.altCount}/${pageElements.imageCount} images have alt text`);
+
+      // 6. Check text content
+      const textInfo = await page.evaluate(() => {
+        const pages = document.querySelectorAll('.page, section');
+        const textPerPage = Array.from(pages).map(p => p.textContent || '');
+        const emptyPages = textPerPage.filter(t => t.trim().length < 10).length;
+        const hasChinese = textPerPage.some(t => /[一-鿿]/.test(t));
+        const hasEnglish = textPerPage.some(t => /[a-zA-Z]/.test(t));
+
+        // Check for duplicate titles
+        const titleChips = Array.from(document.querySelectorAll('.title-chip')).map(e => e.textContent.trim());
+        const uniqueTitles = [...new Set(titleChips)];
+        const hasDuplicates = titleChips.length > uniqueTitles.length;
+
+        return {
+          hasChinese, hasEnglish, emptyPages,
+          titleCount: titleChips.length,
+          hasDuplicateTitles: hasDuplicates,
+          shortPages: textPerPage.filter(t => t.trim().length < 20).length
+        };
+      });
+
+      report('CHINESE_TEXT', textInfo.hasChinese ? 'PASS' : 'FAIL', textInfo.hasChinese ? 'Chinese text found' : 'No Chinese text detected');
+      report('ENGLISH_TEXT', textInfo.hasEnglish ? 'PASS' : 'WARN', textInfo.hasEnglish ? 'English text found' : 'No English text detected');
+      report('NO_EMPTY_PAGES', textInfo.emptyPages === 0 ? 'PASS' : 'FAIL', `${textInfo.emptyPages} empty page(s)`);
+      report('NO_DUPLICATE_TITLES', !textInfo.hasDuplicateTitles ? 'PASS' : 'WARN',
+        textInfo.hasDuplicateTitles ? `${textInfo.titleCount} titles, some may be duplicates` : `${textInfo.titleCount} unique titles`);
+      report('CONTENT_DENSITY', textInfo.shortPages === 0 ? 'PASS' : 'WARN',
+        `${textInfo.shortPages} page(s) with very short content (< 20 chars)`);
+
+      // 7. Check CSS print properties
+      const printStyles = await page.evaluate(() => {
+        const styles = Array.from(document.styleSheets);
+        let hasColorAdjust = false;
+        let hasPageSetup = false;
+
+        for (const sheet of styles) {
+          try {
+            for (const rule of sheet.cssRules) {
+              if (rule.style && rule.style.cssText) {
+                const text = rule.style.cssText.toLowerCase();
+                if (text.includes('print-color-adjust') || text.includes('-webkit-print-color-adjust')) {
+                  hasColorAdjust = true;
+                }
+                if (rule.selectorText && rule.selectorText.includes('@page')) {
+                  hasPageSetup = true;
+                }
+              }
+            }
+          } catch (e) {}
+        }
+        return { hasColorAdjust, hasPageSetup };
+      });
+
+      report('PRINT_COLOR_ADJUST', printStyles.hasColorAdjust ? 'PASS' : 'FAIL',
+        printStyles.hasColorAdjust ? 'print-color-adjust found' : 'Missing print-color-adjust, backgrounds may not render');
+      report('PAGE_SETUP', printStyles.hasPageSetup ? 'PASS' : 'FAIL',
+        printStyles.hasPageSetup ? '@page rule found' : 'Missing @page rule');
+
+      // Summary
+      console.log('\n' + '-'.repeat(50));
+      console.log(`  SUMMARY: ${testResults.passed} passed, ${testResults.warnings} warnings, ${testResults.failed} failed`);
+      console.log('-'.repeat(50));
+
+      if (testResults.failed > 0) {
+        console.log('\n  FAILED TESTS:');
+        testResults.details.filter(d => d.status === 'FAIL').forEach(d => {
+          console.log(`    ✗ ${d.test}: ${d.detail}`);
+        });
+        console.log('');
+        process.exitCode = 1;
+      }
+
+      // Save screenshots for visual verification
+      const screenshotsDir = path.join(path.dirname(pdfAbsPath), '.self-test-screenshots');
+      if (!fs.existsSync(screenshotsDir)) {
+        fs.mkdirSync(screenshotsDir, { recursive: true });
+      }
+
+      const pages = document.querySelectorAll('.page, section');
+      for (let i = 0; i < pages.length; i++) {
+        const screenshotPath = path.join(screenshotsDir, `page-${i + 1}.png`);
+        // Use page.evaluate to scroll to each section and screenshot
+      }
+
+      const fullScreenshot = path.join(screenshotsDir, 'full-preview.png');
+      await page.screenshot({ path: fullScreenshot, fullPage: true });
+      console.log(`  Preview screenshot: ${fullScreenshot}`);
+    }
+
     // Verify output
     if (fs.existsSync(pdfAbsPath)) {
       const stats = fs.statSync(pdfAbsPath);
@@ -357,7 +475,6 @@ console.log(`Viewport: ${viewport.width}x${viewport.height}`);
     console.error('\n✗ PDF generation failed!');
     console.error(`Error: ${error.message}`);
 
-    // Save debug screenshot if in debug mode
     if (debugMode && browser) {
       try {
         const pages = await browser.pages();

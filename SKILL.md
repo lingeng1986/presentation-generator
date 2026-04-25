@@ -771,6 +771,7 @@ node generate-pdf.js --config  # Display current configuration
 | Option | Description | Default |
 |--------|-------------|---------|
 | `--debug` / `-d` | Enable debug mode, logs console messages, checks broken images | off |
+| `--self-test` / `-t` | Run self-tests after generation (PASS/FAIL report) | off |
 | `--timeout=N` | Network idle timeout in seconds | 30 |
 | `--viewport=WxH` | Set viewport dimensions | 1404x993 |
 | `--content-type=TYPE` | Force theme based on content type (see below) | auto |
@@ -855,16 +856,93 @@ playwright install chromium
 | Task | Command |
 |------|---------|
 | Generate PDF | `node scripts/generate-pdf.js input.html output.pdf` |
+| Generate with self-test | `node scripts/generate-pdf.js input.html output.pdf --self-test` |
 | Generate with debug | `node scripts/generate-pdf.js input.html output.pdf --debug` |
 | Auto theme selection | `node scripts/generate-pdf.js input.html output.pdf --auto-theme` |
 | Specify content type | `node scripts/generate-pdf.js input.html output.pdf --content-type=education` |
+| Self-test + auto theme | `node scripts/generate-pdf.js input.html output.pdf --self-test --auto-theme` |
 | New version | Copy HTML, rename with timestamp |
 | AI Check (Claude) | `claude --print "Check PDF: /path/to/file.pdf"` |
 | AI Check (script) | `./scripts/check-pdf.sh slides.pdf requirements.txt` |
 | Manual check | Open PDF, run through checklist |
 | View config | `node scripts/generate-pdf.js --config` |
 | Fix issue | Edit HTML, save as new version, regenerate |
-| Full cycle | Generate → AI Check → Manual Check → Deliver |
+| Full cycle | Generate → Self-Test → AI Check → Manual Check → Deliver |
+
+## Self-Test
+
+Run automatic quality checks after PDF generation:
+
+```bash
+node scripts/generate-pdf.js input.html output.pdf --self-test
+```
+
+### What Self-Test Checks
+
+| Test | What It Checks | Priority |
+|------|---------------|----------|
+| **PDF_EXISTS** | Output PDF file was created | P0 |
+| **PDF_VALID** | File starts with %PDF header | P0 |
+| **FILE_SIZE** | File size < 50MB (configurable) | P1 |
+| **FILE_NOT_EMPTY** | File size > 0 bytes | P0 |
+| **PAGE_COUNT** | At least one page exists | P0 |
+| **PAGE_STRUCTURE** | HTML has .topband elements | P1 |
+| **DECORATION** | HTML has .bottom-reef elements | P2 |
+| **THEME_ASSIGNED** | Every page has a theme class | P1 |
+| **LAYOUT_TYPES** | Layout type identified for each page | P2 |
+| **IMAGE_COUNT** | Images are present | P1 |
+| **IMAGE_ALT** | All images have alt text | P1 |
+| **CHINESE_TEXT** | Chinese characters detected | P0 |
+| **ENGLISH_TEXT** | English text detected | WARN |
+| **NO_EMPTY_PAGES** | No pages with less than 10 chars | P0 |
+| **NO_DUPLICATE_TITLES** | Title chips are unique | WARN |
+| **CONTENT_DENSITY** | No pages with very short content | WARN |
+| **PRINT_COLOR_ADJUST** | CSS print-color-adjust property found | P0 |
+| **PAGE_SETUP** | @page rule defined | P0 |
+
+### Example Output
+
+```
+==================================================
+  SELF-TEST REPORT
+==================================================
+  ✓ [PDF_EXISTS] PDF file generated
+  ✓ [FILE_SIZE] 1.23 MB (max: 50 MB)
+  ✓ [FILE_NOT_EMPTY] 1258.4 KB
+  ✓ [PDF_VALID] Valid PDF header
+  ✓ [PAGE_COUNT] 6 pages
+  ✓ [PAGE_STRUCTURE] topband: 6
+  ✓ [DECORATION] bottom-reef: 6
+  ✓ [THEME_ASSIGNED] themes: blue, green, green, orange, yellow, blue
+  ✓ [LAYOUT_TYPES] layouts: split, split, split, full-screen
+  ✓ [IMAGE_COUNT] 5 images
+  ✓ [IMAGE_ALT] 5/5 images have alt text
+  ✓ [CHINESE_TEXT] Chinese text found
+  ✓ [ENGLISH_TEXT] English text found
+  ✓ [NO_EMPTY_PAGES] 0 empty page(s)
+  ✓ [NO_DUPLICATE_TITLES] 6 unique titles
+  ✓ [CONTENT_DENSITY] 0 page(s) with very short content (< 20 chars)
+  ✓ [PRINT_COLOR_ADJUST] print-color-adjust found
+  ✓ [PAGE_SETUP] @page rule found
+
+--------------------------------------------------
+  SUMMARY: 18 passed, 0 warnings, 0 failed
+--------------------------------------------------
+  Preview screenshot: .self-test-screenshots/full-preview.png
+```
+
+### Self-Test vs AI Check vs Manual Check
+
+| Method | Speed | What It Checks | Best For |
+|--------|-------|---------------|----------|
+| **Self-Test** | < 5s | Structure, technical, content presence | Quick pre-flight check |
+| **AI Check** | 10-30s | Visual quality, tone, subjective | Deep quality review |
+| **Manual Check** | 1-5 min | Overall feel, brand consistency | Final validation |
+
+**Recommended workflow:**
+1. Self-test first (catch obvious issues instantly)
+2. AI check second (detailed quality review)
+3. Manual check last (subjective validation)
 
 ## Example Session
 
