@@ -12,17 +12,13 @@ Thumbs.db
 *.swp
 *.swo
 
-# Generated files
+# Generated files (auto-saved by the script)
+generated/
 *.pdf
 *_debug.png
 
 # Self-test screenshots (auto-generated)
 .self-test-screenshots/
-
-# Version directories (user generated)
-v*/
-versions/
-final/
 
 # Temporary files
 *.tmp

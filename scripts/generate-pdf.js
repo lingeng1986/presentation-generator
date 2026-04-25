@@ -42,6 +42,7 @@ const { chromium } = require('playwright');
 // Load configuration
 function loadConfig() {
   const configPath = path.join(__dirname, '..', 'config.json');
+  const skillRoot = path.join(__dirname, '..');
   const defaultConfig = {
     viewport: { width: 1404, height: 993 },
     browser: { defaultTimeout: 30 },
@@ -52,14 +53,13 @@ function loadConfig() {
       margin: { top: '0', right: '0', bottom: '0', left: '0' }
     },
     quality: { maxFileSizeMB: 50 },
-    output: { defaultDir: process.env.HOME ? path.join(process.env.HOME, 'Downloads') : process.cwd() }
+    output: { defaultDir: path.join(skillRoot, 'generated') }
   };
 
   if (fs.existsSync(configPath)) {
     try {
       const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-      // Expand ~ in output directory
-      if (config.output && config.output.defaultDir) {
+      if (config.output && config.output.defaultDir && config.output.defaultDir.startsWith('~')) {
         config.output.defaultDir = config.output.defaultDir.replace(/^~/, process.env.HOME || '');
       }
       return { ...defaultConfig, ...config };
@@ -72,6 +72,7 @@ function loadConfig() {
 }
 
 const CONFIG = loadConfig();
+const SKILL_ROOT = path.join(__dirname, '..');
 
 // Parse command line arguments
 const args = process.argv.slice(2);

@@ -64,7 +64,7 @@ Examples:
 node scripts/generate-pdf.js input.html
 ```
 
-PDF is saved to `~/Downloads` by default (configurable in `config.json`).
+PDF is saved to `./generated/` by default (configurable in `config.json`).
 
 **Output options:**
 ```bash
@@ -786,7 +786,7 @@ node generate-pdf.js --config  # Display current configuration
 | `--viewport=WxH` | Set viewport dimensions | 1404x993 |
 | `--content-type=TYPE` | Force theme based on content type (see below) | auto |
 | `--auto-theme` / `-a` | Auto-detect theme from HTML content | off |
-| `--output-dir=DIR` | Set output directory for PDF | ~/Downloads |
+| `--output-dir=DIR` | Set output directory for PDF | ./generated |
 | `--output=PATH` | Set full output path (overrides --output-dir) | - |
 | `--config` / `-c` | Display current configuration from config.json | - |
 
@@ -842,7 +842,7 @@ The skill supports a `config.json` file for customizing default values.
     "minTitleSize": "28px"
   },
   "quality": { "maxFileSizeMB": 50 },
-  "output": { "defaultDir": "~/Downloads" }
+  "output": { "defaultDir": "./generated" }
 }
 ```
 
