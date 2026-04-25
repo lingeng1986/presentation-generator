@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>草缸搭建指南</title>
+<style>
+  @page { size: A4 landscape; margin: 0; }
+  html, body { margin:0; padding:0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  * { box-sizing:border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body { font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif; background:#45c5f1; }
+
+  /* ========== BASE STYLES ========== */
+  .page {
+    width:297mm; height:210mm; position:relative; overflow:hidden; page-break-after:always; color:#fff;
+    background:
+      radial-gradient(circle at 8% 10%, rgba(255,255,255,.16) 0 14px, transparent 15px),
+      radial-gradient(circle at 14% 18%, rgba(255,255,255,.11) 0 9px, transparent 10px),
+      radial-gradient(circle at 88% 11%, rgba(255,255,255,.14) 0 12px, transparent 13px),
+      linear-gradient(180deg, #62d8ff 0%, #3ebff0 25%, #2fa6dd 54%, #2596cf 100%) !important;
+  }
+  .page:last-child{ page-break-after:auto; }
+  .topband{ position:absolute; left:0; top:0; width:100%; height:96px; background:linear-gradient(90deg, rgba(255,255,255,.20), rgba(255,255,255,.08)); }
+  .bottom-reef{ position:absolute; left:0; bottom:0; width:100%; height:95px; background:
+      radial-gradient(ellipse at 8% 100%, rgba(255,209,102,.95) 0 20%, transparent 21%),
+      radial-gradient(ellipse at 18% 100%, rgba(123,211,137,.98) 0 18%, transparent 19%),
+      radial-gradient(ellipse at 28% 100%, rgba(255,138,91,.95) 0 17%, transparent 18%),
+      radial-gradient(ellipse at 78% 100%, rgba(123,211,137,.98) 0 18%, transparent 19%),
+      radial-gradient(ellipse at 90% 100%, rgba(255,138,91,.92) 0 22%, transparent 23%); }
+
+  /* ========== SPLIT LAYOUT (Default) ========== */
+  .content{ position:relative; z-index:3; display:grid; grid-template-columns:1.02fr 0.98fr; gap:15mm; padding:18mm 18mm 28mm 18mm; height:100%; }
+  .title-chip{ display:inline-block; padding:12px 24px; border-radius:24px; color:#fff; font-size:30px; font-weight:900; margin-top:7mm; box-shadow:0 10px 22px rgba(0,0,0,.12); }
+  .title-chip.xl { font-size:48px; padding:16px 32px; border-radius:32px; }
+  .blue .title-chip{ background:#2eaee9; }
+  .orange .title-chip{ background:#ff8a5b; }
+  .green .title-chip{ background:#68c98f; }
+  .yellow .title-chip{ background:#f7bf3c; color:#355070; }
+  .en-title{ margin-top:12px; font-size:26px; font-weight:800; color:#fff; text-shadow:0 2px 5px rgba(0,0,0,.12); }
+  .en-title.xl { font-size:36px; }
+  .hero-box{ margin-top:8mm; flex:1; border-radius:30px; padding:10px; background:rgba(255,255,255,.18); border:2px solid rgba(255,255,255,.28); box-shadow:0 16px 26px rgba(27,83,117,.18); display:flex; flex-direction:column; min-height:0; }
+  .hero-photo{ width:100%; flex:1; object-fit:cover; border-radius:24px; display:block; min-height:0; }
+  .right{ display:flex; flex-direction:column; min-height:0; justify-content:center; }
+  .text-card{ margin-top:22mm; border-radius:30px; padding:24px 26px; background:rgba(255,255,255,.18); border:2px solid rgba(255,255,255,.28); box-shadow:0 14px 24px rgba(22,84,122,.18); }
+  .text-card.wide { margin-top:10mm; }
+  .cn-lines{ font-size:31px; line-height:1.48; font-weight:900; color:#ffffff; text-shadow:0 2px 5px rgba(0,0,0,.10); }
+  .en-lines{ margin-top:15px; font-size:24px; line-height:1.52; font-weight:800; color:#ffffff; text-shadow:0 2px 4px rgba(0,0,0,.10); }
+
+  /* ========== FULL SCREEN LAYOUT ========== */
+  .page.full-screen { display:flex; align-items:center; justify-content:center; }
+  .content-center { position:relative; z-index:3; text-align:center; padding:18mm; width:100%; max-width:260mm; }
+  .hero-image-full { margin:15mm auto; max-width:200mm; border-radius:30px; overflow:hidden; box-shadow:0 16px 40px rgba(0,0,0,.2); }
+  .hero-image-full img { width:100%; display:block; }
+  .text-large { margin-top:10mm; }
+  .text-large .cn-lines { font-size:36px; }
+  .text-large .en-lines { font-size:28px; }
+
+  /* ========== TOP-BOTTOM LAYOUT ========== */
+  .content-vertical { position:relative; z-index:3; display:flex; flex-direction:column; padding:15mm 18mm 25mm 18mm; height:100%; }
+  .visual-area { flex:1.5; display:flex; align-items:center; justify-content:center; margin:10mm 0; border-radius:20px; overflow:hidden; background:rgba(255,255,255,.1); }
+  .visual-area img { max-width:100%; max-height:100%; object-fit:contain; }
+  .description-area { flex:1; }
+
+  /* ========== THREE COLUMN LAYOUT ========== */
+  .content-grid { position:relative; z-index:3; padding:15mm 15mm 25mm 15mm; height:100%; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3, 1fr); gap:15mm; margin-top:10mm; }
+  .column { text-align:center; }
+  .column img { width:100%; height:80mm; object-fit:cover; border-radius:20px; margin:8mm 0; }
+  .mini-title { font-size:24px; font-weight:800; color:#fff; text-shadow:0 2px 4px rgba(0,0,0,.15); }
+  .text-block { font-size:20px; line-height:1.5; color:#fff; }
+
+  /* ========== TIMELINE LAYOUT ========== */
+  .content-timeline { position:relative; z-index:3; padding:15mm 18mm 25mm 18mm; height:100%; display:flex; flex-direction:column; }
+  .timeline-horizontal { display:flex; justify-content:space-between; align-items:center; flex:1; padding:0 10mm; position:relative; }
+  .timeline-horizontal::before { content:''; position:absolute; top:50%; left:10mm; right:10mm; height:4px; background:rgba(255,255,255,.3); border-radius:2px; }
+  .timeline-item { position:relative; text-align:center; width:50mm; z-index:1; }
+  .timeline-dot { width:50px; height:50px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800; color:#2fa6dd; margin:0 auto 15px; box-shadow:0 4px 12px rgba(0,0,0,.2); }
+  .timeline-content { background:rgba(255,255,255,.18); border-radius:16px; padding:15px; backdrop-filter:blur(10px); }
+  .timeline-content .cn-lines { font-size:22px; }
+  .timeline-content .en-lines { font-size:18px; margin-top:8px; }
+
+  /* ========== CARD GRID LAYOUT ========== */
+  .content-cards { position:relative; z-index:3; padding:15mm 15mm 25mm 15mm; height:100%; }
+  .card-container { display:grid; grid-template-columns:repeat(4, 1fr); gap:12mm; margin-top:10mm; }
+  .card { background:rgba(255,255,255,.2); border-radius:20px; padding:20px; text-align:center; border:2px solid rgba(255,255,255,.3); backdrop-filter:blur(10px); }
+  .card-icon { font-size:48px; margin-bottom:10px; }
+  .card-title { font-size:22px; font-weight:800; color:#fff; margin-bottom:8px; }
+  .card-text { font-size:16px; line-height:1.4; color:rgba(255,255,255,.9); }
+
+  /* Theme-specific overrides */
+  .yellow .timeline-dot { color:#e5a820; }
+  .orange .timeline-dot { color:#ff7f50; }
+  .green .timeline-dot { color:#45b669; }
+</style>
+</head>
+<body>
+  <!-- ========== PAGE 1: COVER ========== -->
+  <section class="page blue full-screen">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content-center">
+      <div class="title-chip xl">草缸搭建指南</div>
+      <div class="en-title xl">Planted Aquarium Setup Guide</div>
+      <div class="hero-image-full">
+        <svg viewBox="0 0 800 400" style="width:100%;background:linear-gradient(180deg,#1a472a 0%,#2d5016 30%,#1e3a28 60%,#0d1b2a 100%);border-radius:20px;">
+          <!-- Planted tank illustration -->
+          <rect x="50" y="20" width="700" height="360" rx="15" fill="#0d2b3e" stroke="#2a6b8a" stroke-width="3"/>
+          <!-- Water surface -->
+          <ellipse cx="400" cy="60" rx="340" ry="15" fill="#1a5f7a" opacity="0.6"/>
+          <!-- Substrate -->
+          <path d="M50 280 Q200 260 400 270 Q600 280 750 260 L750 380 L50 380 Z" fill="#3d2914"/>
+          <path d="M50 300 Q200 280 400 290 Q600 300 750 280 L750 380 L50 380 Z" fill="#2a1d0e"/>
+          <!-- Plants -->
+          <g>
+            <path d="M100 280 Q95 220 100 180 Q105 220 100 280" fill="#228B22" stroke="#1a6b1a" stroke-width="2"/>
+            <path d="M120 275 Q115 200 125 150 Q135 200 120 275" fill="#2d8c2d" stroke="#1a6b1a" stroke-width="2"/>
+            <path d="M140 270 Q135 210 145 160 Q155 210 140 270" fill="#329a32" stroke="#1a6b1a" stroke-width="2"/>
+          </g>
+          <g>
+            <path d="M200 275 Q190 190 200 120 Q210 190 200 275" fill="#2e7d32" stroke="#1b5e20" stroke-width="2"/>
+            <path d="M220 270 Q210 180 220 110 Q230 180 220 270" fill="#388e3c" stroke="#1b5e20" stroke-width="2"/>
+            <path d="M240 265 Q230 190 240 130 Q250 190 240 265" fill="#43a047" stroke="#1b5e20" stroke-width="2"/>
+          </g>
+          <g>
+            <path d="M560 270 Q550 200 560 140 Q570 200 560 270" fill="#2e7d32" stroke="#1b5e20" stroke-width="2"/>
+            <path d="M580 275 Q570 210 580 150 Q590 210 580 275" fill="#388e3c" stroke="#1b5e20" stroke-width="2"/>
+            <path d="M600 280 Q590 220 600 170 Q610 220 600 280" fill="#43a047" stroke="#1b5e20" stroke-width="2"/>
+          </g>
+          <g>
+            <path d="M660 275 Q655 230 660 190 Q665 230 660 275" fill="#228B22" stroke="#1a6b1a" stroke-width="2"/>
+            <path d="M680 270 Q675 220 685 180 Q695 220 680 270" fill="#2d8c2d" stroke="#1a6b1a" stroke-width="2"/>
+            <path d="M700 265 Q695 210 705 170 Q715 210 700 265" fill="#329a32" stroke="#1a6b1a" stroke-width="2"/>
+          </g>
+          <!-- Fish -->
+          <ellipse cx="400" cy="180" rx="25" ry="10" fill="#ff6b35"/>
+          <path d="M425 180 L440 170 L440 190 Z" fill="#ff6b35"/>
+          <circle cx="390" cy="178" r="2" fill="#000"/>
+          <ellipse cx="500" cy="140" rx="20" ry="8" fill="#4fc3f7"/>
+          <path d="M520 140 L535 132 L535 148 Z" fill="#4fc3f7"/>
+          <circle cx="490" cy="138" r="2" fill="#000"/>
+          <!-- Bubbles -->
+          <circle cx="150" cy="160" r="5" fill="rgba(255,255,255,0.3)"/>
+          <circle cx="250" cy="130" r="4" fill="rgba(255,255,255,0.3)"/>
+          <circle cx="550" cy="150" r="6" fill="rgba(255,255,255,0.3)"/>
+          <circle cx="350" cy="120" r="3" fill="rgba(255,255,255,0.3)"/>
+          <!-- Light rays -->
+          <line x1="400" y1="20" x2="350" y2="100" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+          <line x1="400" y1="20" x2="450" y2="100" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="text-large">
+        <div class="cn-lines">从零开始打造你的水下花园</div>
+        <div class="en-lines">Build Your Own Underwater Garden from Scratch</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PAGE 2: INTRODUCTION ========== -->
+  <section class="page green">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content green">
+      <div class="left" style="display:flex;flex-direction:column;">
+        <div class="title-chip">什么是草缸？</div>
+        <div class="en-title">What is a Planted Tank?</div>
+        <div class="hero-box">
+          <svg viewBox="0 0 400 300" style="width:100%;border-radius:20px;background:linear-gradient(180deg,#1a472a,#0d2b3e);">
+            <rect x="20" y="20" width="360" height="260" rx="10" fill="#0d2b3e" stroke="#2a6b8a" stroke-width="2"/>
+            <path d="M20 180 Q100 170 200 175 Q300 180 380 170 L380 280 L20 280 Z" fill="#3d2914"/>
+            <path d="M60 180 Q55 140 60 100 Q65 140 60 180" fill="#228B22"/>
+            <path d="M100 175 Q95 120 105 80 Q115 120 100 175" fill="#2d8c2d"/>
+            <path d="M140 170 Q135 130 145 90 Q155 130 140 170" fill="#329a32"/>
+            <path d="M260 175 Q255 130 265 90 Q275 130 260 175" fill="#228B22"/>
+            <path d="M300 180 Q295 140 305 100 Q315 140 300 180" fill="#2d8c2d"/>
+            <path d="M340 175 Q335 120 345 80 Q355 120 340 175" fill="#329a32"/>
+            <circle cx="200" cy="120" r="12" fill="#ff6b35"/>
+            <path d="M212 120 L225 112 L225 128 Z" fill="#ff6b35"/>
+            <circle cx="180" cy="100" r="8" fill="#4fc3f7"/>
+            <path d="M188 100 L198 94 L198 106 Z" fill="#4fc3f7"/>
+            <text x="200" y="290" text-anchor="middle" fill="#fff" font-size="14">水草造景示意</text>
+          </svg>
+        </div>
+      </div>
+      <div class="right">
+        <div class="text-card">
+          <div class="cn-lines">水草缸是以活体水草和水生生物为主的水族景观。<br/>融合自然美学与生态科学。<br/>适合家居装饰和放松身心。</div>
+          <div class="en-lines">A planted tank is an aquatic landscape featuring live plants and aquatic life.<br/>Combining natural aesthetics with ecological science.<br/>Perfect for home decoration and relaxation.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PAGE 3: EQUIPMENT NEEDED ========== -->
+  <section class="page orange">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content-cards">
+      <div class="title-chip">必备设备清单</div>
+      <div class="en-title">Essential Equipment List</div>
+      <div class="card-container">
+        <div class="card">
+          <div class="card-icon">🐟</div>
+          <div class="card-title">鱼缸</div>
+          <div class="card-text">超白玻璃缸体，建议60cm以上，厚度5-8mm，容积50L以上</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">💡</div>
+          <div class="card-title">灯具</div>
+          <div class="card-text">全光谱LED水草灯，功率0.5-1W/L，显色指数Ra>80</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🌊</div>
+          <div class="card-title">过滤系统</div>
+          <div class="card-text">外置滤筒或底滤，流量为缸体容积的3-5倍/小时</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">💨</div>
+          <div class="card-title">CO2系统</div>
+          <div class="card-text">钢瓶或发酵式，搭配细化器和电磁阀，维持20-30mg/L</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🌱</div>
+          <div class="card-title">底床</div>
+          <div class="card-text">水草泥厚度3-5cm，底部可加基肥，后景区可加厚</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🌡️</div>
+          <div class="card-title">加热棒</div>
+          <div class="card-text">功率1W/L，恒温24-26°C，带温控保护</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔧</div>
+          <div class="card-title">工具</div>
+          <div class="card-text">水草剪刀、镊子、弯头镊、刮藻刀、换水管</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🧪</div>
+          <div class="card-title">测试剂</div>
+          <div class="card-text">pH、GH、KH、NO3、NO2测试剂，定期监测水质</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PAGE 4: SUBSTRATE SELECTION ========== -->
+  <section class="page green">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content-vertical">
+      <div class="title-chip">底床选择与铺设</div>
+      <div class="en-title">Substrate Selection and Setup</div>
+      <div class="visual-area">
+        <svg viewBox="0 0 700 250" style="width:100%;border-radius:15px;">
+          <!-- Substrate layers diagram -->
+          <rect x="50" y="20" width="600" height="210" rx="10" fill="#0d2b3e" stroke="#2a6b8a" stroke-width="2"/>
+          <!-- Layer 1: Base fertilizer -->
+          <rect x="60" y="180" width="580" height="30" rx="5" fill="#5d4037"/>
+          <text x="350" y="200" text-anchor="middle" fill="#fff" font-size="14">底层：基肥层 1-2cm</text>
+          <!-- Layer 2: Main substrate -->
+          <rect x="60" y="130" width="580" height="50" rx="5" fill="#4e342e"/>
+          <text x="350" y="160" text-anchor="middle" fill="#fff" font-size="14">中层：水草泥 3-5cm</text>
+          <!-- Layer 3: Top layer -->
+          <rect x="60" y="100" width="580" height="30" rx="5" fill="#3e2723"/>
+          <text x="350" y="120" text-anchor="middle" fill="#fff" font-size="14">表层：细粒水草泥 1cm</text>
+          <!-- Water layer -->
+          <rect x="60" y="40" width="580" height="60" rx="5" fill="#1a5f7a" opacity="0.5"/>
+          <text x="350" y="75" text-anchor="middle" fill="#fff" font-size="14">水层</text>
+          <!-- Arrows -->
+          <path d="M350 85 L350 95" stroke="#fff" stroke-width="2" marker-end="url(#arrow)"/>
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+              <path d="M0,0 L10,5 L0,10 Z" fill="#fff"/>
+            </marker>
+          </defs>
+        </svg>
+      </div>
+      <div class="description-area">
+        <div class="text-card wide">
+          <div class="cn-lines">底床是水草生长的基础，影响养分供给和根系发育。<br/>建议厚度：前景3cm，中景4cm，后景5cm。<br/>铺设时前低后高，营造层次感。</div>
+          <div class="en-lines">Substrate is the foundation for plant growth, affecting nutrient supply and root development.<br/>Recommended thickness: foreground 3cm, midground 4cm, background 5cm.<br/>Create depth by sloping from back to front.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PAGE 5: PLANT SELECTION ========== -->
+  <section class="page green">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content-grid">
+      <div class="title-chip">水草选择与搭配</div>
+      <div class="en-title">Plant Selection and Arrangement</div>
+      <div class="grid-3">
+        <div class="column">
+          <div class="mini-title">前景草</div>
+          <svg viewBox="0 0 200 150" style="width:100%;border-radius:15px;background:linear-gradient(180deg,#1a472a,#2d5016);">
+            <path d="M20 120 Q25 100 20 80 Q15 100 20 120" fill="#4caf50"/>
+            <path d="M40 125 Q45 105 40 85 Q35 105 40 125" fill="#66bb6a"/>
+            <path d="M60 120 Q65 95 60 70 Q55 95 60 120" fill="#4caf50"/>
+            <path d="M80 115 Q85 90 80 65 Q75 90 80 115" fill="#66bb6a"/>
+            <path d="M100 120 Q105 100 100 80 Q95 100 100 120" fill="#4caf50"/>
+            <path d="M120 125 Q125 105 120 85 Q115 105 120 125" fill="#66bb6a"/>
+            <path d="M140 120 Q145 95 140 70 Q135 95 140 120" fill="#4caf50"/>
+            <path d="M160 115 Q165 90 160 65 Q155 90 160 115" fill="#66bb6a"/>
+            <path d="M180 120 Q185 100 180 80 Q175 100 180 120" fill="#4caf50"/>
+            <text x="100" y="145" text-anchor="middle" fill="#fff" font-size="12">矮珍珠/牛毛毡</text>
+          </svg>
+          <div class="text-block">矮珍珠、牛毛毡、迷你矮珍珠、小对叶。<br/>高度2-5cm，覆盖底床。</div>
+        </div>
+        <div class="column">
+          <div class="mini-title">中景草</div>
+          <svg viewBox="0 0 200 150" style="width:100%;border-radius:15px;background:linear-gradient(180deg,#1a472a,#2d5016);">
+            <path d="M30 120 Q28 90 30 60 Q32 90 30 120" fill="#4caf50" stroke="#388e3c" stroke-width="2"/>
+            <path d="M50 115 Q48 85 50 50 Q52 85 50 115" fill="#66bb6a" stroke="#388e3c" stroke-width="2"/>
+            <path d="M70 120 Q68 80 70 40 Q72 80 70 120" fill="#4caf50" stroke="#388e3c" stroke-width="2"/>
+            <path d="M90 125 Q88 90 90 55 Q92 90 90 125" fill="#66bb6a" stroke="#388e3c" stroke-width="2"/>
+            <path d="M110 120 Q108 85 110 45 Q112 85 110 120" fill="#4caf50" stroke="#388e3c" stroke-width="2"/>
+            <path d="M130 115 Q128 80 130 35 Q132 80 130 115" fill="#66bb6a" stroke="#388e3c" stroke-width="2"/>
+            <path d="M150 120 Q148 90 150 60 Q152 90 150 120" fill="#4caf50" stroke="#388e3c" stroke-width="2"/>
+            <path d="M170 125 Q168 95 170 70 Q172 95 170 125" fill="#66bb6a" stroke="#388e3c" stroke-width="2"/>
+            <text x="100" y="145" text-anchor="middle" fill="#fff" font-size="12">水草/铁皇冠</text>
+          </svg>
+          <div class="text-block">水榕、铁皇冠、椒草、莫丝。<br/>高度10-20cm，过渡区域。</div>
+        </div>
+        <div class="column">
+          <div class="mini-title">后景草</div>
+          <svg viewBox="0 0 200 150" style="width:100%;border-radius:15px;background:linear-gradient(180deg,#1a472a,#2d5016);">
+            <path d="M25 120 Q23 70 25 30 Q27 70 25 120" fill="#2e7d32" stroke="#1b5e20" stroke-width="3"/>
+            <path d="M45 115 Q43 60 45 20 Q47 60 45 115" fill="#388e3c" stroke="#1b5e20" stroke-width="3"/>
+            <path d="M65 120 Q63 65 65 25 Q67 65 65 120" fill="#2e7d32" stroke="#1b5e20" stroke-width="3"/>
+            <path d="M85 125 Q83 75 85 35 Q87 75 85 125" fill="#388e3c" stroke="#1b5e20" stroke-width="3"/>
+            <path d="M105 120 Q103 70 105 30 Q107 70 105 120" fill="#2e7d32" stroke="#1b5e20" stroke-width="3"/>
+            <path d="M125 115 Q123 60 125 20 Q127 60 125 115" fill="#388e3c" stroke="#1b5e20" stroke-width="3"/>
+            <path d="M145 120 Q143 65 145 25 Q147 65 145 120" fill="#2e7d32" stroke="#1b5e20" stroke-width="3"/>
+            <path d="M165 125 Q163 75 165 35 Q167 75 165 125" fill="#388e3c" stroke="#1b5e20" stroke-width="3"/>
+            <path d="M185 120 Q183 70 185 30 Q187 70 185 120" fill="#2e7d32" stroke="#1b5e20" stroke-width="3"/>
+            <text x="100" y="145" text-anchor="middle" fill="#fff" font-size="12">宫廷/绿菊/水蕴草</text>
+          </svg>
+          <div class="text-block">宫廷草、绿菊、水蕴草、红蝴蝶。<br/>高度20-40cm，背景遮挡。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PAGE 6: WATER PARAMETERS ========== -->
+  <section class="page blue">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content blue">
+      <div class="left" style="display:flex;flex-direction:column;">
+        <div class="title-chip">水质参数</div>
+        <div class="en-title">Water Parameters</div>
+        <div class="hero-box">
+          <svg viewBox="0 0 400 300" style="width:100%;border-radius:20px;background:linear-gradient(180deg,#1a472a,#0d2b3e);">
+            <!-- pH scale -->
+            <rect x="30" y="30" width="340" height="20" rx="10" fill="url(#phGradient)"/>
+            <defs>
+              <linearGradient id="phGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#ff4444"/>
+                <stop offset="50%" style="stop-color:#4caf50"/>
+                <stop offset="100%" style="stop-color:#2196f3"/>
+              </linearGradient>
+            </defs>
+            <text x="30" y="25" fill="#fff" font-size="12">0 酸性  7 中性  14 碱性</text>
+            <text x="200" y="65" text-anchor="middle" fill="#4caf50" font-size="16">草缸最佳pH: 6.0-7.0</text>
+            <!-- Temperature -->
+            <text x="50" y="100" fill="#fff" font-size="14">温度 Temperature</text>
+            <rect x="150" y="90" width="200" height="15" rx="7" fill="#1a5f7a"/>
+            <rect x="170" y="90" width="160" height="15" rx="7" fill="#4caf50"/>
+            <text x="250" y="102" text-anchor="middle" fill="#fff" font-size="10">24-26°C</text>
+            <!-- GH -->
+            <text x="50" y="140" fill="#fff" font-size="14">硬度 GH</text>
+            <rect x="150" y="130" width="200" height="15" rx="7" fill="#1a5f7a"/>
+            <rect x="180" y="130" width="140" height="15" rx="7" fill="#4caf50"/>
+            <text x="250" y="142" text-anchor="middle" fill="#fff" font-size="10">4-8 dGH</text>
+            <!-- KH -->
+            <text x="50" y="180" fill="#fff" font-size="14">碳酸盐硬度 KH</text>
+            <rect x="150" y="170" width="200" height="15" rx="7" fill="#1a5f7a"/>
+            <rect x="170" y="170" width="160" height="15" rx="7" fill="#4caf50"/>
+            <text x="250" y="182" text-anchor="middle" fill="#fff" font-size="10">3-5 dKH</text>
+            <!-- NO3 -->
+            <text x="50" y="220" fill="#fff" font-size="14">硝酸盐 NO3</text>
+            <rect x="150" y="210" width="200" height="15" rx="7" fill="#1a5f7a"/>
+            <rect x="150" y="210" width="60" height="15" rx="7" fill="#4caf50"/>
+            <text x="180" y="222" text-anchor="middle" fill="#fff" font-size="10">5-20 mg/L</text>
+            <!-- CO2 -->
+            <text x="50" y="260" fill="#fff" font-size="14">二氧化碳 CO2</text>
+            <rect x="150" y="250" width="200" height="15" rx="7" fill="#1a5f7a"/>
+            <rect x="170" y="250" width="160" height="15" rx="7" fill="#4caf50"/>
+            <text x="250" y="262" text-anchor="middle" fill="#fff" font-size="10">20-30 mg/L</text>
+            <text x="200" y="290" text-anchor="middle" fill="#fff" font-size="12">水质参数范围</text>
+          </svg>
+        </div>
+      </div>
+      <div class="right">
+        <div class="text-card">
+          <div class="cn-lines">pH值：6.0-7.0 微酸性环境。<br/>温度：24-26°C 恒温控制。<br/>硬度：GH 4-8, KH 3-5。<br/>定期检测水质，保持稳定。</div>
+          <div class="en-lines">pH: 6.0-7.0 slightly acidic environment.<br/>Temperature: 24-26°C constant control.<br/>Hardness: GH 4-8, KH 3-5.<br/>Test water regularly, maintain stability.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PAGE 7: LIGHTING (HIGHLIGHT) ========== -->
+  <section class="page yellow">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content-vertical">
+      <div class="title-chip">光照系统 — 关键要素</div>
+      <div class="en-title">Lighting System — Key Factor</div>
+      <div class="visual-area">
+        <svg viewBox="0 0 700 250" style="width:100%;border-radius:15px;background:#1a2a3e;">
+          <!-- Light spectrum -->
+          <text x="350" y="30" text-anchor="middle" fill="#fff" font-size="16">全光谱LED光照示意图</text>
+          <!-- Light rays -->
+          <g stroke="#fff" stroke-width="3" opacity="0.5">
+            <line x1="350" y1="50" x2="100" y2="200"/>
+            <line x1="350" y1="50" x2="200" y2="200"/>
+            <line x1="350" y1="50" x2="350" y2="200"/>
+            <line x1="350" y1="50" x2="500" y2="200"/>
+            <line x1="350" y1="50" x2="600" y2="200"/>
+          </g>
+          <!-- Light fixture -->
+          <rect x="250" y="40" width="200" height="20" rx="10" fill="#555" stroke="#777" stroke-width="2"/>
+          <circle cx="300" cy="50" r="5" fill="#fff"/>
+          <circle cx="350" cy="50" r="5" fill="#fff"/>
+          <circle cx="400" cy="50" r="5" fill="#fff"/>
+          <!-- Tank -->
+          <rect x="100" y="120" width="500" height="120" rx="5" fill="#0d2b3e" stroke="#2a6b8a" stroke-width="2"/>
+          <!-- Plants under light -->
+          <path d="M150 230 Q148 190 150 160 Q152 190 150 230" fill="#4caf50"/>
+          <path d="M200 225 Q198 170 200 140 Q202 170 200 225" fill="#66bb6a"/>
+          <path d="M250 230 Q248 185 250 150 Q252 185 250 230" fill="#4caf50"/>
+          <path d="M300 235 Q298 175 300 130 Q302 175 300 235" fill="#66bb6a"/>
+          <path d="M350 230 Q348 180 350 140 Q352 180 350 230" fill="#4caf50"/>
+          <path d="M400 235 Q398 175 400 130 Q402 175 400 235" fill="#66bb6a"/>
+          <path d="M450 230 Q448 190 450 160 Q452 190 450 230" fill="#4caf50"/>
+          <path d="M500 225 Q498 170 500 140 Q502 170 500 225" fill="#66bb6a"/>
+          <path d="M550 230 Q548 185 550 150 Q552 185 550 230" fill="#4caf50"/>
+          <!-- Light intensity labels -->
+          <text x="120" y="248" fill="#ffeb3b" font-size="10">弱光区</text>
+          <text x="320" y="248" fill="#fff" font-size="10">强光区</text>
+          <text x="530" y="248" fill="#ffeb3b" font-size="10">弱光区</text>
+        </svg>
+      </div>
+      <div class="description-area">
+        <div class="text-card wide">
+          <div class="cn-lines">光照强度：0.5-1W/L（升），全光谱LED灯。<br/>光照时间：每天8-10小时，定时器控制。<br/>光照过强易长藻，过弱水草生长缓慢。<br/>显色指数Ra>80，色温6500K最佳。</div>
+          <div class="en-lines">Light intensity: 0.5-1W per liter, full-spectrum LED.<br/>Duration: 8-10 hours daily, timer controlled.<br/>Too much light causes algae; too little slows growth.<br/>Color rendering Ra>80, 6500K color temperature optimal.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PAGE 8: CO2 SYSTEM ========== -->
+  <section class="page orange">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content orange">
+      <div class="left" style="display:flex;flex-direction:column;">
+        <div class="title-chip">CO2系统</div>
+        <div class="en-title">CO2 System</div>
+        <div class="hero-box">
+          <svg viewBox="0 0 400 300" style="width:100%;border-radius:20px;background:linear-gradient(180deg,#1a2a3e,#0d2b3e);">
+            <!-- CO2 cylinder -->
+            <rect x="160" y="20" width="80" height="120" rx="40" fill="#666" stroke="#888" stroke-width="2"/>
+            <rect x="185" y="5" width="30" height="25" rx="5" fill="#555" stroke="#777" stroke-width="2"/>
+            <text x="200" y="85" text-anchor="middle" fill="#fff" font-size="14">CO2</text>
+            <text x="200" y="105" text-anchor="middle" fill="#fff" font-size="12">钢瓶</text>
+            <!-- Valve -->
+            <rect x="140" y="140" width="120" height="20" rx="5" fill="#444" stroke="#666" stroke-width="2"/>
+            <circle cx="200" cy="150" r="8" fill="#333" stroke="#555" stroke-width="2"/>
+            <text x="200" y="155" text-anchor="middle" fill="#fff" font-size="8">阀</text>
+            <!-- Tube -->
+            <path d="M200 160 Q200 180 220 190 Q250 200 280 200" stroke="#666" stroke-width="4" fill="none"/>
+            <!-- Diffuser -->
+            <rect x="270" y="195" width="40" height="30" rx="5" fill="#333" stroke="#555" stroke-width="2"/>
+            <text x="290" y="215" text-anchor="middle" fill="#fff" font-size="8">细化器</text>
+            <!-- Bubbles -->
+            <circle cx="290" cy="190" r="4" fill="rgba(255,255,255,0.4)"/>
+            <circle cx="285" cy="180" r="3" fill="rgba(255,255,255,0.4)"/>
+            <circle cx="295" cy="170" r="5" fill="rgba(255,255,255,0.4)"/>
+            <circle cx="288" cy="160" r="4" fill="rgba(255,255,255,0.4)"/>
+            <circle cx="292" cy="150" r="3" fill="rgba(255,255,255,0.4)"/>
+            <circle cx="286" cy="140" r="4" fill="rgba(255,255,255,0.4)"/>
+            <!-- Drop checker -->
+            <circle cx="340" cy="220" r="15" fill="#333" stroke="#555" stroke-width="2"/>
+            <circle cx="340" cy="218" r="8" fill="#4caf50"/>
+            <text x="340" y="245" text-anchor="middle" fill="#fff" font-size="8">检测器</text>
+            <!-- Labels -->
+            <text x="200" y="280" text-anchor="middle" fill="#fff" font-size="14">CO2系统示意图</text>
+          </svg>
+        </div>
+      </div>
+      <div class="right">
+        <div class="text-card">
+          <div class="cn-lines">钢瓶式：稳定可控，适合长期养殖。<br/>发酵式：成本低，适合入门尝试。<br/>CO2浓度：20-30mg/L，用检测器监控。<br/>配合灯光使用，关灯后关闭气源。</div>
+          <div class="en-lines">Cylinder: Stable and controllable, long-term use.<br/>Fermentation: Low cost, good for beginners.<br/>CO2 concentration: 20-30mg/L, monitor with checker.<br/>Use with lighting, turn off when lights off.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PAGE 9: SETUP STEPS (TIMELINE) ========== -->
+  <section class="page blue">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content-timeline">
+      <div class="title-chip">搭建步骤</div>
+      <div class="en-title">Setup Steps</div>
+      <div class="timeline-horizontal">
+        <div class="timeline-item">
+          <div class="timeline-dot">1</div>
+          <div class="timeline-content">
+            <div class="cn-lines">清洗鱼缸，铺设底床</div>
+            <div class="en-lines">Clean tank, lay substrate</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">2</div>
+          <div class="timeline-content">
+            <div class="cn-lines">种植水草，前低后高</div>
+            <div class="en-lines">Plant grass, low front high back</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">3</div>
+          <div class="timeline-content">
+            <div class="cn-lines">安装过滤，注水调试</div>
+            <div class="en-lines">Install filter, fill water</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">4</div>
+          <div class="timeline-content">
+            <div class="cn-lines">养水一周，建立菌群</div>
+            <div class="en-lines">Cycle water one week</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">5</div>
+          <div class="timeline-content">
+            <div class="cn-lines">加入鱼虾，开始维护</div>
+            <div class="en-lines">Add fish/shrimp, maintain</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PAGE 10: MAINTENANCE TIPS ========== -->
+  <section class="page orange">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content-cards">
+      <div class="title-chip">日常维护技巧</div>
+      <div class="en-title">Daily Maintenance Tips</div>
+      <div class="card-container">
+        <div class="card">
+          <div class="card-icon">💧</div>
+          <div class="card-title">换水</div>
+          <div class="card-text">每周换水1/3，除氯后加入，保持水质稳定</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">✂️</div>
+          <div class="card-title">修剪</div>
+          <div class="card-text">定期修剪过长水草，保持造型，促进分枝</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🧹</div>
+          <div class="card-title">清洁</div>
+          <div class="card-text">刮除缸壁藻类，清理底床杂质，保持透明</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔬</div>
+          <div class="card-title">检测</div>
+          <div class="card-text">每周测试pH、NO3、GH，记录变化趋势</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🌿</div>
+          <div class="card-title">施肥</div>
+          <div class="card-text">每周添加液肥，适量根肥，避免过量长藻</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🐟</div>
+          <div class="card-title">观察</div>
+          <div class="card-text">观察鱼虾状态，异常及时处理，预防疾病</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">💡</div>
+          <div class="card-title">灯光</div>
+          <div class="card-text">使用定时器，每天8-10小时，避免过长</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔄</div>
+          <div class="card-title">过滤</div>
+          <div class="card-text">每月清洗滤材一半，保留有益菌群</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PAGE 11: COMMON MISTAKES ========== -->
+  <section class="page yellow">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content-cards">
+      <div class="title-chip">常见错误与避坑指南</div>
+      <div class="en-title">Common Mistakes to Avoid</div>
+      <div class="card-container">
+        <div class="card">
+          <div class="card-icon">❌</div>
+          <div class="card-title">急于放鱼</div>
+          <div class="card-text">建缸后立即放鱼，应养水至少一周建立硝化系统</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">❌</div>
+          <div class="card-title">光照过长</div>
+          <div class="card-text">每天超过12小时光照会导致爆藻，应控制在8-10小时</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">❌</div>
+          <div class="card-title">过度喂食</div>
+          <div class="card-text">残饵污染水质，每天喂食1-2次，2分钟内吃完为宜</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">❌</div>
+          <div class="card-title">换水过量</div>
+          <div class="card-text">一次性换水超过1/2会改变水质，应少量多次</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">❌</div>
+          <div class="card-title">忽视pH</div>
+          <div class="card-text">pH波动超过0.5会导致鱼虾应激，应保持稳定</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">❌</div>
+          <div class="card-title">种植过密</div>
+          <div class="card-text">水草之间留有空间，给生长留出余地</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">❌</div>
+          <div class="card-title">忽略CO2</div>
+          <div class="card-text">高光无水草缸必须补充CO2，否则水草难以生长</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">❌</div>
+          <div class="card-title">过滤过弱</div>
+          <div class="card-text">过滤流量应为缸体容积3-5倍/小时，否则水质恶化</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== PAGE 12: THANK YOU ========== -->
+  <section class="page blue full-screen">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content-center">
+      <div class="title-chip xl">感谢观看</div>
+      <div class="en-title xl">Thank You!</div>
+      <div class="hero-image-full">
+        <svg viewBox="0 0 800 300" style="width:100%;background:linear-gradient(180deg,#1a472a 0%,#2d5016 30%,#1e3a28 60%,#0d1b2a 100%);border-radius:20px;">
+          <!-- Fish tank scene -->
+          <rect x="100" y="20" width="600" height="260" rx="10" fill="#0d2b3e" stroke="#2a6b8a" stroke-width="2"/>
+          <path d="M100 180 Q250 170 400 175 Q550 180 700 170 L700 280 L100 280 Z" fill="#3d2914"/>
+          <path d="M100 200 Q250 190 400 195 Q550 200 700 190 L700 280 L100 280 Z" fill="#2a1d0e"/>
+          <!-- Plants -->
+          <path d="M150 185 Q145 140 150 100 Q155 140 150 185" fill="#228B22"/>
+          <path d="M200 180 Q195 120 205 80 Q215 120 200 180" fill="#2d8c2d"/>
+          <path d="M250 175 Q245 130 255 90 Q265 130 250 175" fill="#329a32"/>
+          <path d="M550 180 Q545 130 555 90 Q565 130 550 180" fill="#228B22"/>
+          <path d="M600 185 Q595 140 605 100 Q615 140 600 185" fill="#2d8c2d"/>
+          <path d="M650 175 Q645 120 655 80 Q665 120 650 175" fill="#329a32"/>
+          <!-- Fish -->
+          <ellipse cx="350" cy="140" rx="20" ry="8" fill="#ff6b35"/>
+          <path d="M370 140 L385 132 L385 148 Z" fill="#ff6b35"/>
+          <circle cx="340" cy="138" r="2" fill="#000"/>
+          <ellipse cx="450" cy="110" rx="18" ry="7" fill="#4fc3f7"/>
+          <path d="M468 110 L480 104 L480 116 Z" fill="#4fc3f7"/>
+          <circle cx="440" cy="108" r="2" fill="#000"/>
+          <ellipse cx="500" cy="160" rx="15" ry="6" fill="#81c784"/>
+          <path d="M515 160 L525 155 L525 165 Z" fill="#81c784"/>
+          <circle cx="492" cy="158" r="2" fill="#000"/>
+          <!-- Text -->
+          <text x="400" y="270" text-anchor="middle" fill="#fff" font-size="18">愿你的草缸生机勃勃</text>
+          <text x="400" y="290" text-anchor="middle" fill="#4fc3f7" font-size="14">May your planted tank thrive with life</text>
+        </svg>
+      </div>
+      <div class="text-large">
+        <div class="cn-lines">愿你的草缸生机勃勃，带来宁静与美好</div>
+        <div class="en-lines">May your planted tank thrive with life, bringing peace and beauty</div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>
