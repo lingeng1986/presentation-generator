@@ -9,6 +9,8 @@
   html, body { margin:0; padding:0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   * { box-sizing:border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   body { font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif; background:#45c5f1; }
+
+  /* ========== BASE STYLES ========== */
   .page {
     width:297mm; height:210mm; position:relative; overflow:hidden; page-break-after:always; color:#fff;
     background:
@@ -25,23 +27,74 @@
       radial-gradient(ellipse at 28% 100%, rgba(255,138,91,.95) 0 17%, transparent 18%),
       radial-gradient(ellipse at 78% 100%, rgba(123,211,137,.98) 0 18%, transparent 19%),
       radial-gradient(ellipse at 90% 100%, rgba(255,138,91,.92) 0 22%, transparent 23%); }
+
+  /* ========== SPLIT LAYOUT (Default) ========== */
   .content{ position:relative; z-index:3; display:grid; grid-template-columns:1.02fr 0.98fr; gap:15mm; padding:18mm 18mm 28mm 18mm; height:100%; }
   .title-chip{ display:inline-block; padding:12px 24px; border-radius:24px; color:#fff; font-size:30px; font-weight:900; margin-top:7mm; box-shadow:0 10px 22px rgba(0,0,0,.12); }
+  .title-chip.xl { font-size:48px; padding:16px 32px; border-radius:32px; }
   .blue .title-chip{ background:#2eaee9; }
   .orange .title-chip{ background:#ff8a5b; }
   .green .title-chip{ background:#68c98f; }
   .yellow .title-chip{ background:#f7bf3c; color:#355070; }
   .en-title{ margin-top:12px; font-size:26px; font-weight:800; color:#fff; text-shadow:0 2px 5px rgba(0,0,0,.12); }
+  .en-title.xl { font-size:36px; }
   .hero-box{ margin-top:8mm; flex:1; border-radius:30px; padding:10px; background:rgba(255,255,255,.18); border:2px solid rgba(255,255,255,.28); box-shadow:0 16px 26px rgba(27,83,117,.18); display:flex; flex-direction:column; min-height:0; }
   .hero-photo{ width:100%; flex:1; object-fit:cover; border-radius:24px; display:block; min-height:0; }
   .right{ display:flex; flex-direction:column; min-height:0; justify-content:center; }
   .text-card{ margin-top:22mm; border-radius:30px; padding:24px 26px; background:rgba(255,255,255,.18); border:2px solid rgba(255,255,255,.28); box-shadow:0 14px 24px rgba(22,84,122,.18); }
+  .text-card.wide { margin-top:10mm; }
   .cn-lines{ font-size:31px; line-height:1.48; font-weight:900; color:#ffffff; text-shadow:0 2px 5px rgba(0,0,0,.10); }
   .en-lines{ margin-top:15px; font-size:24px; line-height:1.52; font-weight:800; color:#ffffff; text-shadow:0 2px 4px rgba(0,0,0,.10); }
+
+  /* ========== FULL SCREEN LAYOUT ========== */
+  .page.full-screen { display:flex; align-items:center; justify-content:center; }
+  .content-center { position:relative; z-index:3; text-align:center; padding:18mm; width:100%; max-width:260mm; }
+  .hero-image-full { margin:15mm auto; max-width:200mm; border-radius:30px; overflow:hidden; box-shadow:0 16px 40px rgba(0,0,0,.2); }
+  .hero-image-full img { width:100%; display:block; }
+  .text-large { margin-top:10mm; }
+  .text-large .cn-lines { font-size:36px; }
+  .text-large .en-lines { font-size:28px; }
+
+  /* ========== TOP-BOTTOM LAYOUT ========== */
+  .content-vertical { position:relative; z-index:3; display:flex; flex-direction:column; padding:15mm 18mm 25mm 18mm; height:100%; }
+  .visual-area { flex:1.5; display:flex; align-items:center; justify-content:center; margin:10mm 0; border-radius:20px; overflow:hidden; background:rgba(255,255,255,.1); }
+  .visual-area img { max-width:100%; max-height:100%; object-fit:contain; }
+  .description-area { flex:1; }
+
+  /* ========== THREE COLUMN LAYOUT ========== */
+  .content-grid { position:relative; z-index:3; padding:15mm 15mm 25mm 15mm; height:100%; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3, 1fr); gap:15mm; margin-top:10mm; }
+  .column { text-align:center; }
+  .column img { width:100%; height:80mm; object-fit:cover; border-radius:20px; margin:8mm 0; }
+  .mini-title { font-size:24px; font-weight:800; color:#fff; text-shadow:0 2px 4px rgba(0,0,0,.15); }
+  .text-block { font-size:20px; line-height:1.5; color:#fff; }
+
+  /* ========== TIMELINE LAYOUT ========== */
+  .content-timeline { position:relative; z-index:3; padding:15mm 18mm 25mm 18mm; height:100%; display:flex; flex-direction:column; }
+  .timeline-horizontal { display:flex; justify-content:space-between; align-items:center; flex:1; padding:0 10mm; position:relative; }
+  .timeline-horizontal::before { content:''; position:absolute; top:50%; left:10mm; right:10mm; height:4px; background:rgba(255,255,255,.3); border-radius:2px; }
+  .timeline-item { position:relative; text-align:center; width:50mm; z-index:1; }
+  .timeline-dot { width:50px; height:50px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800; color:#2fa6dd; margin:0 auto 15px; box-shadow:0 4px 12px rgba(0,0,0,.2); }
+  .timeline-content { background:rgba(255,255,255,.18); border-radius:16px; padding:15px; backdrop-filter:blur(10px); }
+  .timeline-content .cn-lines { font-size:22px; }
+  .timeline-content .en-lines { font-size:18px; margin-top:8px; }
+
+  /* ========== CARD GRID LAYOUT ========== */
+  .content-cards { position:relative; z-index:3; padding:15mm 15mm 25mm 15mm; height:100%; }
+  .card-container { display:grid; grid-template-columns:repeat(4, 1fr); gap:12mm; margin-top:10mm; }
+  .card { background:rgba(255,255,255,.2); border-radius:20px; padding:20px; text-align:center; border:2px solid rgba(255,255,255,.3); backdrop-filter:blur(10px); }
+  .card-icon { font-size:48px; margin-bottom:10px; }
+  .card-title { font-size:22px; font-weight:800; color:#fff; margin-bottom:8px; }
+  .card-text { font-size:16px; line-height:1.4; color:rgba(255,255,255,.9); }
+
+  /* Theme-specific overrides */
+  .yellow .timeline-dot { color:#e5a820; }
+  .orange .timeline-dot { color:#ff7f50; }
+  .green .timeline-dot { color:#45b669; }
 </style>
 </head>
 <body>
-  <!-- ========== COVER PAGE ========== -->
+  <!-- ========== SPLIT LAYOUT (Default) - COVER PAGE ========== -->
   <section class="page blue">
     <div class="topband"></div><div class="bottom-reef"></div>
     <div class="content blue">
@@ -59,21 +112,123 @@
     </div>
   </section>
 
-  <!-- ========== ANIMAL PAGE TEMPLATE ========== -->
-  <!-- Copy this section for each animal you want to present -->
-  <!-- Color options: blue, orange, green, yellow -->
-  <section class="page [COLOR]">
+  <!-- ========== FULL SCREEN LAYOUT - QUOTE/COVER ========== -->
+  <section class="page yellow full-screen">
     <div class="topband"></div><div class="bottom-reef"></div>
-    <div class="content [COLOR]">
-      <div class="left" style="display:flex;flex-direction:column;">
-        <div class="title-chip">[中文标题]</div>
-        <div class="en-title">[English Title]</div>
-        <div class="hero-box"><img class="hero-photo" src="[动物图片]" alt="[动物名称]" /></div>
+    <div class="content-center">
+      <div class="title-chip xl">[主标题]</div>
+      <div class="en-title xl">[Main Title]</div>
+      <div class="hero-image-full"><img src="[大图]" alt="Hero" /></div>
+      <div class="text-large">
+        <div class="cn-lines">[一句话总结]</div>
+        <div class="en-lines">[One line summary]</div>
       </div>
-      <div class="right">
-        <div class="text-card">
-          <div class="cn-lines">[中文描述文案]<br/>[第二行]</div>
-          <div class="en-lines">[English description]<br/>[Second line]</div>
+    </div>
+  </section>
+
+  <!-- ========== TOP-BOTTOM LAYOUT - CHART/DATA ========== -->
+  <section class="page orange">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content-vertical">
+      <div class="title-chip">[数据分析]</div>
+      <div class="visual-area"><img src="[图表]" alt="Chart" /></div>
+      <div class="description-area">
+        <div class="text-card wide">
+          <div class="cn-lines">[分析结果]<br/>[关键发现]</div>
+          <div class="en-lines">[Analysis]<br/>[Findings]</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== THREE COLUMN LAYOUT - COMPARISON ========== -->
+  <section class="page green">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content-grid">
+      <div class="title-chip">[对比]</div>
+      <div class="grid-3">
+        <div class="column">
+          <div class="mini-title">[选项A]</div>
+          <img src="[图A]" alt="A" />
+          <div class="text-block">[描述A]</div>
+        </div>
+        <div class="column">
+          <div class="mini-title">[选项B]</div>
+          <img src="[图B]" alt="B" />
+          <div class="text-block">[描述B]</div>
+        </div>
+        <div class="column">
+          <div class="mini-title">[选项C]</div>
+          <img src="[图C]" alt="C" />
+          <div class="text-block">[描述C]</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TIMELINE LAYOUT - PROCESS ========== -->
+  <section class="page blue">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content-timeline">
+      <div class="title-chip">[流程]</div>
+      <div class="timeline-horizontal">
+        <div class="timeline-item">
+          <div class="timeline-dot">1</div>
+          <div class="timeline-content">
+            <div class="cn-lines">[第一步]</div>
+            <div class="en-lines">[Step 1]</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">2</div>
+          <div class="timeline-content">
+            <div class="cn-lines">[第二步]</div>
+            <div class="en-lines">[Step 2]</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">3</div>
+          <div class="timeline-content">
+            <div class="cn-lines">[第三步]</div>
+            <div class="en-lines">[Step 3]</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">4</div>
+          <div class="timeline-content">
+            <div class="cn-lines">[第四步]</div>
+            <div class="en-lines">[Step 4]</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== CARD GRID LAYOUT - FEATURES ========== -->
+  <section class="page orange">
+    <div class="topband"></div><div class="bottom-reef"></div>
+    <div class="content-cards">
+      <div class="title-chip">[特点]</div>
+      <div class="card-container">
+        <div class="card">
+          <div class="card-icon">🎯</div>
+          <div class="card-title">[特点1]</div>
+          <div class="card-text">[描述]</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <div class="card-title">[特点2]</div>
+          <div class="card-text">[描述]</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🌟</div>
+          <div class="card-title">[特点3]</div>
+          <div class="card-text">[描述]</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">💡</div>
+          <div class="card-title">[特点4]</div>
+          <div class="card-text">[描述]</div>
         </div>
       </div>
     </div>

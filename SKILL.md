@@ -215,7 +215,366 @@ project-name/
 
 ## HTML Template System
 
-### Page Structure
+### Page Layout Types
+
+Choose the right layout for your content:
+
+```
+┌─────────────────────────────────────────┐
+│                                         │
+│     Layout Selection Guide              │
+│                                         │
+├─────────────────────────────────────────┤
+│ Layout          │ Best For              │
+├─────────────────┼───────────────────────┤
+│ Split (左右)     │ Picture + Text        │
+│ Full (全屏)      │ Title/Quote/Image     │
+│ Top-Bottom      │ Chart + Description   │
+│ Three-Column    │ Comparison (A/B/C)  │
+│ Timeline        │ Process/History       │
+│ Card-Grid       │ Multiple Points       │
+└─────────────────┴───────────────────────┘
+```
+
+---
+
+#### Layout 1: Split (左右分栏) - Default
+
+**Best for**: One image + text description
+**Content density**: Medium
+**Visual balance**: Photo left, text right
+
+```
+┌─────────────────────────────────────────┐
+│  [Title]                                │
+│  ┌─────────────┐  ┌─────────────────┐  │
+│  │             │  │                 │  │
+│  │    IMAGE    │  │   Main text     │  │
+│  │             │  │   goes here     │  │
+│  │             │  │                 │  │
+│  │             │  │   Sub text      │  │
+│  └─────────────┘  └─────────────────┘  │
+└─────────────────────────────────────────┘
+```
+
+**HTML Template:**
+```html
+<section class="page [THEME]">
+  <div class="topband"></div>
+  <div class="bottom-reef"></div>
+  <div class="content [THEME]">
+    <div class="left">
+      <div class="title-chip">Title</div>
+      <div class="en-title">English Title</div>
+      <div class="hero-box">
+        <img class="hero-photo" src="image.jpg" alt="Description" />
+      </div>
+    </div>
+    <div class="right">
+      <div class="text-card">
+        <div class="cn-lines">中文内容<br/>第二行</div>
+        <div class="en-lines">English content<br/>Second line</div>
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+**When to use:**
+- Presenting a single subject (animal, product, person)
+- Educational content with visual support
+- Portfolio showcases
+- Storytelling with illustration
+
+---
+
+#### Layout 2: Full Screen (全屏居中)
+
+**Best for**: Title slides, quotes, dramatic images
+**Content density**: Low
+**Visual impact**: Maximum
+
+```
+┌─────────────────────────────────────────┐
+│                                         │
+│                                         │
+│         ┌─────────────────┐              │
+│         │   MAIN TITLE    │              │
+│         │   Subtitle      │              │
+│         └─────────────────┘              │
+│                                         │
+│              [Optional Image]           │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+**HTML Template:**
+```html
+<section class="page [THEME] full-screen">
+  <div class="topband"></div>
+  <div class="bottom-reef"></div>
+  <div class="content-center">
+    <div class="title-chip xl">主标题</div>
+    <div class="en-title xl">Main Title</div>
+    <div class="hero-image-full">
+      <img src="hero.jpg" alt="Hero" />
+    </div>
+    <div class="text-large">
+      <div class="cn-lines">一句话总结</div>
+      <div class="en-lines">One line summary</div>
+    </div>
+  </div>
+</section>
+```
+
+**When to use:**
+- Opening/closing slides
+- Chapter transitions
+- Inspirational quotes
+- Full-bleed photography
+- Minimal text presentations
+
+**Recommended themes**: `blue` (trust), `yellow` (attention)
+
+---
+
+#### Layout 3: Top-Bottom (上下结构)
+
+**Best for**: Charts, diagrams, large visuals with explanation
+**Content density**: High
+**Reading flow**: Visual first, then details
+
+```
+┌─────────────────────────────────────────┐
+│  [Title]                                │
+│  ┌─────────────────────────────────┐   │
+│  │                                 │   │
+│  │      LARGE CHART / IMAGE        │   │
+│  │                                 │   │
+│  └─────────────────────────────────┘   │
+│  ┌─────────────────────────────────┐   │
+│  │  Description text goes here   │   │
+│  │  Key points and insights      │   │
+│  └─────────────────────────────────┘   │
+└─────────────────────────────────────────┘
+```
+
+**HTML Template:**
+```html
+<section class="page [THEME] top-bottom">
+  <div class="topband"></div>
+  <div class="bottom-reef"></div>
+  <div class="content-vertical">
+    <div class="title-chip">Data Analysis</div>
+    <div class="visual-area">
+      <img src="chart.png" alt="Chart" />
+      <!-- Or embed SVG chart -->
+    </div>
+    <div class="description-area">
+      <div class="text-card wide">
+        <div class="cn-lines">数据分析结果<br/>关键发现</div>
+        <div class="en-lines">Analysis results<br/>Key findings</div>
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+**When to use:**
+- Data visualization
+- Process diagrams
+- Maps with annotations
+- Before/after comparisons
+- Large infographics
+
+**Recommended themes**: `orange` (data), `green` (growth metrics)
+
+---
+
+#### Layout 4: Three Column (三栏对比)
+
+**Best for**: Comparison, multiple items, pros/cons
+**Content density**: High
+**Pattern**: Equal weight columns
+
+```
+┌─────────────────────────────────────────┐
+│  [Title]                                │
+│  ┌────────┐ ┌────────┐ ┌────────┐      │
+│  │        │ │        │ │        │      │
+│  │ Col A  │ │ Col B  │ │ Col C  │      │
+│  │        │ │        │ │        │      │
+│  │ Image  │ │ Image  │ │ Image  │      │
+│  │        │ │        │ │        │      │
+│  │ Text   │ │ Text   │ │ Text   │      │
+│  └────────┘ └────────┘ └────────┘      │
+└─────────────────────────────────────────┘
+```
+
+**HTML Template:**
+```html
+<section class="page [THEME] three-column">
+  <div class="topband"></div>
+  <div class="bottom-reef"></div>
+  <div class="content-grid">
+    <div class="title-chip">Comparison</div>
+    <div class="grid-3">
+      <div class="column">
+        <div class="mini-title">Option A</div>
+        <img src="a.jpg" alt="A" />
+        <div class="text-block">Description A</div>
+      </div>
+      <div class="column">
+        <div class="mini-title">Option B</div>
+        <img src="b.jpg" alt="B" />
+        <div class="text-block">Description B</div>
+      </div>
+      <div class="column">
+        <div class="mini-title">Option C</div>
+        <img src="c.jpg" alt="C" />
+        <div class="text-block">Description C</div>
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+**When to use:**
+- Product comparisons
+- Feature lists
+- Team member introductions
+- Service tiers
+- Timeline phases
+
+**Recommended themes**: `green` (balanced), `blue` (professional)
+
+---
+
+#### Layout 5: Timeline (时间轴)
+
+**Best for**: Processes, history, step-by-step
+**Content density**: Medium
+**Flow**: Horizontal or vertical progression
+
+```
+┌─────────────────────────────────────────┐
+│  [Title]                                │
+│                                         │
+│  ──●────────●────────●────────●───     │
+│    │        │        │        │         │
+│   [1]      [2]      [3]      [4]       │
+│   Step     Step     Step     Step      │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+**HTML Template:**
+```html
+<section class="page [THEME] timeline">
+  <div class="topband"></div>
+  <div class="bottom-reef"></div>
+  <div class="content-timeline">
+    <div class="title-chip">Process</div>
+    <div class="timeline-horizontal">
+      <div class="timeline-item">
+        <div class="timeline-dot">1</div>
+        <div class="timeline-content">
+          <div class="cn-lines">第一步</div>
+          <div class="en-lines">Step One</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-dot">2</div>
+        <div class="timeline-content">
+          <div class="cn-lines">第二步</div>
+          <div class="en-lines">Step Two</div>
+        </div>
+      </div>
+      <!-- More steps... -->
+    </div>
+  </div>
+</section>
+```
+
+**When to use:**
+- Step-by-step guides
+- Historical progression
+- Project milestones
+- Workflow diagrams
+- Development stages
+
+**Recommended themes**: `orange` (progression), `green` (growth)
+
+---
+
+#### Layout 6: Card Grid (卡片网格)
+
+**Best for**: Multiple points, features, portfolio items
+**Content density**: Very high
+**Pattern**: Grid of equal cards
+
+```
+┌─────────────────────────────────────────┐
+│  [Title]                                │
+│  ┌────┐ ┌────┐ ┌────┐ ┌────┐          │
+│  │Card│ │Card│ │Card│ │Card│          │
+│  │ 1  │ │ 2  │ │ 3  │ │ 4  │          │
+│  └────┘ └────┘ └────┘ └────┘          │
+│  ┌────┐ ┌────┐ ┌────┐ ┌────┐          │
+│  │Card│ │Card│ │Card│ │Card│          │
+│  │ 5  │ │ 6  │ │ 7  │ │ 8  │          │
+│  └────┘ └────┘ └────┘ └────┘          │
+└─────────────────────────────────────────┘
+```
+
+**HTML Template:**
+```html
+<section class="page [THEME] card-grid">
+  <div class="topband"></div>
+  <div class="bottom-reef"></div>
+  <div class="content-cards">
+    <div class="title-chip">Features</div>
+    <div class="card-container">
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <div class="card-title">Feature 1</div>
+        <div class="card-text">Description</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <div class="card-title">Feature 2</div>
+        <div class="card-text">Description</div>
+      </div>
+      <!-- More cards... -->
+    </div>
+  </div>
+</section>
+```
+
+**When to use:**
+- Feature lists
+- Portfolio galleries
+- Product catalogs
+- Team grids
+- Icon lists
+
+**Recommended themes**: `yellow` (highlights), `green` (features)
+
+---
+
+### Layout Selection Quick Guide
+
+| Content Type | Recommended Layout | Theme |
+|--------------|-------------------|-------|
+| Single subject + image | Split | blue/green |
+| Opening/closing slides | Full Screen | blue/yellow |
+| Charts and data | Top-Bottom | orange |
+| Comparison (2-3 items) | Three Column | green/blue |
+| Process/steps | Timeline | orange/green |
+| Multiple features/points | Card Grid | yellow/green |
+| Storytelling with visuals | Split | blue/orange |
+
+### Page Structure (Legacy)
 
 ```html
 <section class="page [THEME]">
