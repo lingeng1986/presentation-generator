@@ -23,18 +23,7 @@ function checkDependencies() {
   try {
     require.resolve('playwright');
   } catch (e) {
-    issues.push('Playwright is not installed. Run: npm install -g playwright');
-  }
-
-  try {
-    const playwrightPath = require.resolve('playwright');
-    const playwrightDir = path.dirname(playwrightPath);
-    const chromiumPath = path.join(playwrightDir, '..', '.local-browsers', 'chromium');
-    if (!fs.existsSync(chromiumPath)) {
-      issues.push('Chromium browser not found. Run: playwright install chromium');
-    }
-  } catch (e) {
-    issues.push('Cannot verify Chromium installation. Run: playwright install chromium');
+    issues.push('Playwright is not installed. Run: npm install playwright');
   }
 
   return issues;
@@ -206,15 +195,42 @@ console.log(`Viewport: ${viewport.width}x${viewport.height}`);
           health: 'green', growth: 'green', warm: 'yellow', keypoint: 'yellow'
         };
 
-        function detectContentType(pageIndex, totalPages, text) {
+        function detectContentType(pageIndex, totalPages, text, pageClasses) {
+          // First/last page detection
           if (pageIndex === 0) return 'cover';
           if (pageIndex === totalPages - 1) return 'thankyou';
+
           const lower = text.toLowerCase();
-          if (lower.includes('总结') || lower.includes('summary') || lower.includes('结论')) return 'summary';
-          if (lower.includes('数据') || lower.includes('data') || lower.includes('统计') || lower.includes('chart')) return 'data';
-          if (lower.includes('动物') || lower.includes('植物') || lower.includes('nature') || lower.includes('animal')) return 'nature';
-          if (lower.includes('重点') || lower.includes('highlight') || lower.includes('关键')) return 'highlight';
-          if (lower.includes('教育') || lower.includes('学习') || lower.includes('education') || lower.includes('learn')) return 'education';
+
+          // Layout-based detection
+          if (pageClasses.includes('timeline') || pageClasses.includes('timeline-horizontal')) {
+            // Timeline layouts are usually steps/process
+            if (text.includes('步骤') || text.includes('step') || text.includes('过程')) return 'main';
+          }
+          if (pageClasses.includes('card-grid') || pageClasses.includes('content-cards')) {
+            // Card grids with many items
+            if (text.includes('维护') || text.includes('maintenance') || text.includes('技巧') || text.includes('tip')) return 'main';
+            if (text.includes('错误') || text.includes('mistake') || text.includes('避坑') || text.includes('avoid')) return 'highlight';
+          }
+          if (pageClasses.includes('three-column') || pageClasses.includes('content-grid')) {
+            // Three column layouts
+            if (text.includes('选择') || text.includes('selection') || text.includes('搭配') || text.includes('arrangement')) return 'nature';
+            if (text.includes('对比') || text.includes('compare') || text.includes('comparison')) return 'data';
+          }
+          if (pageClasses.includes('top-bottom') || pageClasses.includes('content-vertical')) {
+            // Top-bottom layouts
+            if (text.includes('底床') || text.includes('substrate') || text.includes('光照') || text.includes('light')) return 'highlight';
+            if (text.includes('参数') || text.includes('parameter') || text.includes('water')) return 'data';
+          }
+
+          // Keyword-based detection
+          if (lower.includes('总结') || lower.includes('summary') || lower.includes('结论') || lower.includes('conclusion') || lower.includes('感谢') || lower.includes('thank')) return 'summary';
+          if (lower.includes('数据') || lower.includes('data') || lower.includes('统计') || lower.includes('参数') || lower.includes('parameter') || lower.includes('水质') || lower.includes('water parameter')) return 'data';
+          if (lower.includes('动物') || lower.includes('植物') || lower.includes('nature') || lower.includes('animal') || lower.includes('plant') || lower.includes('水草') || lower.includes('草缸')) return 'nature';
+          if (lower.includes('重点') || lower.includes('highlight') || lower.includes('关键') || lower.includes('key') || lower.includes('关键要素')) return 'highlight';
+          if (lower.includes('教育') || lower.includes('学习') || lower.includes('education') || lower.includes('learn') || lower.includes('教程') || lower.includes('guide') || lower.includes('搭建') || lower.includes('setup')) return 'education';
+          if (lower.includes('介绍') || lower.includes('intro') || lower.includes('概述') || lower.includes('overview') || lower.includes('什么是') || lower.includes('what is')) return 'intro';
+
           return 'main';
         }
 
@@ -225,7 +241,8 @@ console.log(`Viewport: ${viewport.width}x${viewport.height}`);
           let theme = detectedType ? (contentTypeMap[detectedType] || 'blue') : 'blue';
           if (!detectedType) {
             const text = pg.textContent || '';
-            theme = contentTypeMap[detectContentType(index, totalPages, text)] || 'blue';
+            const pageClasses = pg.className.split(' ');
+            theme = contentTypeMap[detectContentType(index, totalPages, text, pageClasses)] || 'blue';
           }
           pg.classList.remove('blue', 'orange', 'green', 'yellow');
           pg.classList.add(theme);
@@ -327,7 +344,7 @@ console.log(`Viewport: ${viewport.width}x${viewport.height}`);
         report('FILE_NOT_EMPTY', stats.size > 0 ? 'PASS' : 'FAIL', `${(stats.size / 1024).toFixed(1)} KB`);
 
         // 4. PDF is valid (starts with %PDF)
-        const header = fs.readFileSync(pdfAbsPath, { encoding: 'buffer' }).slice(0, 4).toString();
+        const header = fs.readFileSync(pdfAbsPath).slice(0, 4).toString();
         report('PDF_VALID', header === '%PDF' ? 'PASS' : 'FAIL', header === '%PDF' ? 'Valid PDF header' : `Invalid header: ${header}`);
       }
 
@@ -404,7 +421,6 @@ console.log(`Viewport: ${viewport.width}x${viewport.height}`);
       const printStyles = await page.evaluate(() => {
         const styles = Array.from(document.styleSheets);
         let hasColorAdjust = false;
-        let hasPageSetup = false;
 
         for (const sheet of styles) {
           try {
@@ -414,20 +430,28 @@ console.log(`Viewport: ${viewport.width}x${viewport.height}`);
                 if (text.includes('print-color-adjust') || text.includes('-webkit-print-color-adjust')) {
                   hasColorAdjust = true;
                 }
-                if (rule.selectorText && rule.selectorText.includes('@page')) {
-                  hasPageSetup = true;
-                }
               }
             }
           } catch (e) {}
         }
-        return { hasColorAdjust, hasPageSetup };
+
+        // Also check computed style
+        const bodyStyle = window.getComputedStyle(document.body);
+        const colorAdjust = bodyStyle.getPropertyValue('-webkit-print-color-adjust') ||
+                           bodyStyle.getPropertyValue('print-color-adjust');
+        if (colorAdjust === 'exact') hasColorAdjust = true;
+
+        return { hasColorAdjust };
       });
 
       report('PRINT_COLOR_ADJUST', printStyles.hasColorAdjust ? 'PASS' : 'FAIL',
         printStyles.hasColorAdjust ? 'print-color-adjust found' : 'Missing print-color-adjust, backgrounds may not render');
-      report('PAGE_SETUP', printStyles.hasPageSetup ? 'PASS' : 'FAIL',
-        printStyles.hasPageSetup ? '@page rule found' : 'Missing @page rule');
+
+      // Check @page rule in HTML source
+      const htmlSource = fs.readFileSync(htmlAbsPath, 'utf8');
+      const hasPageRule = /@page/.test(htmlSource);
+      report('PAGE_SETUP', hasPageRule ? 'PASS' : 'FAIL',
+        hasPageRule ? '@page rule found in HTML' : 'Missing @page rule');
 
       // Summary
       console.log('\n' + '-'.repeat(50));
@@ -447,12 +471,6 @@ console.log(`Viewport: ${viewport.width}x${viewport.height}`);
       const screenshotsDir = path.join(path.dirname(pdfAbsPath), '.self-test-screenshots');
       if (!fs.existsSync(screenshotsDir)) {
         fs.mkdirSync(screenshotsDir, { recursive: true });
-      }
-
-      const pages = document.querySelectorAll('.page, section');
-      for (let i = 0; i < pages.length; i++) {
-        const screenshotPath = path.join(screenshotsDir, `page-${i + 1}.png`);
-        // Use page.evaluate to scroll to each section and screenshot
       }
 
       const fullScreenshot = path.join(screenshotsDir, 'full-preview.png');
