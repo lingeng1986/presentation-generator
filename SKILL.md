@@ -245,12 +245,83 @@ project-name/
 
 ### Available Themes
 
-| Class | Use Case | Colors |
-|-------|----------|--------|
-| `.blue` | Cover, intro | Sky blue gradient |
-| `.orange` | Main content | Warm coral |
-| `.green` | Secondary content | Fresh green |
-| `.yellow` | Highlights, special | Sunny yellow |
+| Theme | Color | Best For | Psychology |
+|-------|-------|----------|------------|
+| **blue** | Ocean Blue | Cover, Intro, Thank You | Trust, professional, calm |
+| **orange** | Coral Orange | Main content, Data | Energy, creativity, action |
+| **green** | Fresh Green | Nature, Education, Health | Growth, harmony, comfort |
+| **yellow** | Sunshine Yellow | Highlights, Summary | Optimism, attention, key points |
+
+### Content Types to Theme Mapping
+
+```
+┌─────────────────┬──────────────────┬──────────────────┐
+│ Content Type    │ Recommended      │ When to Use      │
+├─────────────────┼──────────────────┼──────────────────┤
+│ cover           │ blue             │ First page,      │
+│                 │                  │ title slide      │
+├─────────────────┼──────────────────┼──────────────────┤
+│ intro           │ blue             │ Agenda, overview │
+├─────────────────┼──────────────────┼──────────────────┤
+│ main            │ orange           │ Core content,    │
+│                 │                  │ detailed info    │
+├─────────────────┼──────────────────┼──────────────────┤
+│ highlight       │ yellow           │ Key points,      │
+│                 │                  │ important data   │
+├─────────────────┼──────────────────┼──────────────────┤
+│ nature          │ green            │ Animals, plants, │
+│                 │                  │ environment      │
+├─────────────────┼──────────────────┼──────────────────┤
+│ education       │ green            │ Teaching,        │
+│                 │                  │ child-friendly   │
+├─────────────────┼──────────────────┼──────────────────┤
+│ data            │ orange           │ Charts, stats,   │
+│                 │                  │ analysis         │
+├─────────────────┼──────────────────┼──────────────────┤
+│ summary         │ yellow           │ Conclusion,      │
+│                 │                  │ takeaways        │
+├─────────────────┼──────────────────┼──────────────────┤
+│ thankyou        │ blue             │ Final page,      │
+│                 │                  │ contact info     │
+└─────────────────┴──────────────────┴──────────────────┘
+```
+
+### Applying Themes
+
+**Manual selection:**
+```html
+<section class="page blue">   <!-- Cover page -->
+<section class="page orange"> <!-- Main content -->
+<section class="page green">  <!-- Nature topic -->
+<section class="page yellow"> <!-- Key highlight -->
+```
+
+**Auto-detection (see Script Reference):**
+```bash
+node generate-pdf.js input.html output.pdf --content-type=education
+```
+
+### Color Psychology
+
+**Blue (Ocean)**
+- Use when: Establishing credibility, opening/closing
+- Avoid: High-energy content, urgent messages
+- Works with: Corporate, educational, technical topics
+
+**Orange (Coral)**
+- Use when: Presenting detailed information, data
+- Avoid: Too many consecutive orange slides (can be overwhelming)
+- Works with: Sales, marketing, analytics, action items
+
+**Green (Fresh)**
+- Use when: Environmental, health, educational content
+- Avoid: Financial/serious topics (can feel too casual)
+- Works with: Biology, sustainability, children's content
+
+**Yellow (Sunshine)**
+- Use when: Highlighting key takeaways, summarizing
+- Avoid: Long content sections (best for short, punchy slides)
+- Works with: Tips, callouts, conclusions, celebrations
 
 ### Critical CSS Properties
 
@@ -332,6 +403,8 @@ node generate-pdf.js input.html output.pdf
 node generate-pdf.js input.html output.pdf --viewport 1404x993
 node generate-pdf.js input.html output.pdf --debug
 node generate-pdf.js input.html output.pdf --timeout=60
+node generate-pdf.js input.html output.pdf --content-type=education
+node generate-pdf.js input.html output.pdf --auto-theme
 node generate-pdf.js --config  # Display current configuration
 ```
 
@@ -341,7 +414,22 @@ node generate-pdf.js --config  # Display current configuration
 | `--debug` / `-d` | Enable debug mode, logs console messages, checks broken images | off |
 | `--timeout=N` | Network idle timeout in seconds | 30 |
 | `--viewport=WxH` | Set viewport dimensions | 1404x993 |
+| `--content-type=TYPE` | Force theme based on content type (see below) | auto |
+| `--auto-theme` / `-a` | Auto-detect theme from HTML content | off |
 | `--config` / `-c` | Display current configuration from config.json | - |
+
+**Content Types & Themes:**
+| Content Type | Theme | Best For |
+|--------------|-------|----------|
+| `cover` | blue | Title page, first slide |
+| `intro` | blue | Agenda, overview, introduction |
+| `main` | orange | Core content, detailed information |
+| `highlight` | yellow | Key points, important data |
+| `nature` | green | Animals, plants, environment topics |
+| `education` | green | Teaching content, child-friendly |
+| `data` | orange | Charts, statistics, analysis |
+| `summary` | yellow | Conclusions, takeaways |
+| `thankyou` | blue | Final page, contact info |
 
 **Features:**
 - Waits for network idle (images load before PDF)
@@ -352,6 +440,7 @@ node generate-pdf.js --config  # Display current configuration
 - **Broken image detection**
 - **Dependency checking** (Playwright/Chromium)
 - **Configuration file support** (config.json)
+- **Automatic theme selection** based on content type
 
 ## Configuration
 
@@ -408,6 +497,8 @@ playwright install chromium
 |------|---------|
 | Generate PDF | `node scripts/generate-pdf.js input.html output.pdf` |
 | Generate with debug | `node scripts/generate-pdf.js input.html output.pdf --debug` |
+| Auto theme selection | `node scripts/generate-pdf.js input.html output.pdf --auto-theme` |
+| Specify content type | `node scripts/generate-pdf.js input.html output.pdf --content-type=education` |
 | New version | Copy HTML, rename with timestamp |
 | AI Check (Claude) | `claude --print "Check PDF: /path/to/file.pdf"` |
 | AI Check (script) | `./scripts/check-pdf.sh slides.pdf requirements.txt` |

@@ -90,6 +90,8 @@ let viewport = { ...CONFIG.viewport };
 let debugMode = false;
 let timeout = CONFIG.browser.defaultTimeout * 1000;
 let pdfFormat = CONFIG.pdf;
+let contentType = null;
+let autoTheme = false;
 
 // Parse arguments
 args.forEach(arg => {
@@ -101,6 +103,14 @@ args.forEach(arg => {
     console.log('Current configuration:');
     console.log(JSON.stringify(CONFIG, null, 2));
     process.exit(0);
+  }
+  if (arg === '--auto-theme' || arg === '-a') {
+    autoTheme = true;
+    console.log('Auto theme detection enabled');
+  }
+  if (arg.startsWith('--content-type')) {
+    const [, value] = arg.split('=');
+    if (value) contentType = value;
   }
   if (arg.startsWith('--timeout')) {
     const [, value] = arg.split('=') || arg.split(' ');
@@ -121,11 +131,16 @@ if (!htmlPath) {
   console.error('  --debug              Enable debug mode (saves screenshot on failure)');
   console.error('  --timeout=N          Set network idle timeout in seconds (default: 30)');
   console.error('  --viewport=WxH       Set viewport dimensions (default: 1404x993)');
+  console.error('  --content-type=TYPE  Specify content type for auto theme selection');
+  console.error('  --auto-theme         Auto detect content type from HTML');
   console.error('  --config             Display current configuration');
   console.error('');
-  console.error('Configuration file: config.json');
+  console.error('Content Types: cover, intro, main, highlight, nature, education, data, summary, thankyou');
   console.error('');
-  console.error('Example: node generate-pdf.js presentation.html my-presentation.pdf --debug');
+  console.error('Examples:');
+  console.error('  node generate-pdf.js presentation.html output.pdf');
+  console.error('  node generate-pdf.js presentation.html output.pdf --content-type=education');
+  console.error('  node generate-pdf.js presentation.html output.pdf --auto-theme --debug');
   process.exit(1);
 }
 
@@ -165,6 +180,114 @@ console.log(`Viewport: ${viewport.width}x${viewport.height}`);
     }
 
     // Load HTML file with timeout
+    console.log('Loading HTML file...');
+    try {
+      await page.goto(`file://${htmlAbsPath}`, {
+        waitUntil: 'networkidle',
+        timeout: timeout
+      });
+    } catch (e) {
+      if (e.name === 'TimeoutError') {
+        console.warn('Warning: Network idle timeout, proceeding anyway...');
+        // Continue with PDF generation even if network didn't fully idle
+      } else {
+        throw e;
+      }
+    }
+
+    // Apply automatic theme selection if enabled
+    if (autoTheme || contentType) {
+      console.log('Applying theme selection...');
+      await page.evaluate((detectedType, config) => {
+        // Content type to theme mapping
+        const contentTypeMap = {
+          cover: 'blue',
+          intro: 'blue',
+          main: 'orange',
+          highlight: 'yellow',
+          nature: 'green',
+          education: 'green',
+          data: 'orange',
+          summary: 'yellow',
+          thankyou: 'blue',
+          formal: 'blue',
+          activity: 'orange',
+          energetic: 'orange',
+          health: 'green',
+          growth: 'green',
+          warm: 'yellow',
+          keypoint: 'yellow'
+        };
+
+        function detectContentType(pageIndex, totalPages, text) {
+          const lowerText = text.toLowerCase();
+
+          // First page is usually cover
+          if (pageIndex === 0) return 'cover';
+          // Last page is usually thank you
+          if (pageIndex === totalPages - 1) return 'thankyou';
+
+          // Keyword detection
+          if (lowerText.includes('总结') || lowerText.includes('summary') ||
+              lowerText.includes('结论') || lowerText.includes('conclusion')) {
+            return 'summary';
+          }
+          if (lowerText.includes('数据') || lowerText.includes('data') ||
+              lowerText.includes('统计') || lowerText.includes('图表') ||
+              lowerText.includes('chart')) {
+            return 'data';
+          }
+          if (lowerText.includes('动物') || lowerText.includes('植物') ||
+              lowerText.includes('nature') || lowerText.includes('environment') ||
+              lowerText.includes('tree') || lowerText.includes('animal')) {
+            return 'nature';
+          }
+          if (lowerText.includes('重点') || lowerText.includes('highlight') ||
+              lowerText.includes('关键') || lowerText.includes('key')) {
+            return 'highlight';
+          }
+          if (lowerText.includes('教育') || lowerText.includes('学习') ||
+              lowerText.includes('education') || lowerText.includes('learn')) {
+            return 'education';
+          }
+
+          return 'main';
+        }
+
+        const pages = document.querySelectorAll('.page, section');
+        const totalPages = pages.length;
+
+        pages.forEach((page, index) => {
+          let theme = 'blue'; // default
+
+          if (detectedType) {
+            // Use explicitly specified content type
+            theme = contentTypeMap[detectedType] || 'blue';
+          } else {
+            // Auto-detect from page content
+            const text = page.textContent || '';
+            const detected = detectContentType(index, totalPages, text);
+            theme = contentTypeMap[detected] || 'blue';
+          }
+
+          // Apply theme class
+          page.classList.remove('blue', 'orange', 'green', 'yellow');
+          page.classList.add(theme);
+
+          // Also apply to content container
+          const content = page.querySelector('.content');
+          if (content) {
+            content.classList.remove('blue', 'orange', 'green', 'yellow');
+            content.classList.add(theme);
+          }
+
+          // Log for debugging
+          if (typeof console !== 'undefined') {
+            console.log(`Page ${index + 1}: Applied theme '${theme}'`);
+          }
+        });
+      }, contentType, CONFIG);
+    }
     console.log('Loading HTML file...');
     try {
       await page.goto(`file://${htmlAbsPath}`, {

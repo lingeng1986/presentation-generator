@@ -19,9 +19,68 @@
     "headless": true,
     "defaultTimeout": 30
   },
+  "contentTypes": {
+    "cover": {
+      "name": "封面/开场",
+      "description": "演示文稿的第一页，用于吸引注意力",
+      "recommendedTheme": "blue",
+      "characteristics": ["标题醒目", "视觉冲击", "建立第一印象"]
+    },
+    "intro": {
+      "name": "介绍/概览",
+      "description": "内容概述、目录、议程",
+      "recommendedTheme": "blue",
+      "characteristics": ["清晰简洁", "逻辑性强", "引导性"]
+    },
+    "main": {
+      "name": "主要内容",
+      "description": "核心信息、详细内容",
+      "recommendedTheme": "orange",
+      "characteristics": ["信息量大", "重点突出", "易于理解"]
+    },
+    "highlight": {
+      "name": "重点/强调",
+      "description": "关键数据、核心观点、重要提醒",
+      "recommendedTheme": "yellow",
+      "characteristics": ["高对比度", "一眼可见", "印象深刻"]
+    },
+    "nature": {
+      "name": "自然/环保",
+      "description": "植物、动物、环境相关内容",
+      "recommendedTheme": "green",
+      "characteristics": ["清新自然", "生机勃勃", "和谐感"]
+    },
+    "education": {
+      "name": "教育/儿童",
+      "description": "面向儿童的教育内容",
+      "recommendedTheme": "green",
+      "characteristics": ["友好亲和", "易于接受", "活泼有趣"]
+    },
+    "data": {
+      "name": "数据/分析",
+      "description": "图表、统计数据、分析结果",
+      "recommendedTheme": "orange",
+      "characteristics": ["专业可信", "数据驱动", "逻辑清晰"]
+    },
+    "summary": {
+      "name": "总结/收尾",
+      "description": "结论、要点回顾、行动号召",
+      "recommendedTheme": "yellow",
+      "characteristics": ["简洁有力", "易于记忆", "启发思考"]
+    },
+    "thankyou": {
+      "name": "感谢/结束",
+      "description": "结束页、致谢、联系方式",
+      "recommendedTheme": "blue",
+      "characteristics": ["礼貌专业", "完整收尾", "留有印象"]
+    }
+  },
   "themes": {
     "blue": {
       "name": "海洋蓝",
+      "description": "专业、冷静、信任感，适合开场和正式内容",
+      "bestFor": ["cover", "intro", "thankyou", "formal"],
+      "colorPsychology": "代表信任、专业、冷静，适合建立权威感",
       "titleChip": "#2eaee9",
       "gradientStart": "#62d8ff",
       "gradientMid": "#3ebff0",
@@ -29,6 +88,9 @@
     },
     "orange": {
       "name": "珊瑚橙",
+      "description": "活力、热情、能量，适合主要内容和数据展示",
+      "bestFor": ["main", "data", "activity", "energetic"],
+      "colorPsychology": "代表活力、创造力、行动，吸引注意力并保持专注",
       "titleChip": "#ff8a5b",
       "gradientStart": "#ffb347",
       "gradientMid": "#ff9f5a",
@@ -36,6 +98,9 @@
     },
     "green": {
       "name": "清新绿",
+      "description": "自然、健康、成长，适合教育和环保主题",
+      "bestFor": ["nature", "education", "health", "growth"],
+      "colorPsychology": "代表成长、和谐、健康，给人安心和舒适的感觉",
       "titleChip": "#68c98f",
       "gradientStart": "#7dd78a",
       "gradientMid": "#5bc97d",
@@ -43,6 +108,9 @@
     },
     "yellow": {
       "name": "阳光黄",
+      "description": "温暖、快乐、重点，适合强调和总结内容",
+      "bestFor": ["highlight", "summary", "warm", "keypoint"],
+      "colorPsychology": "代表乐观、能量、注意力，最适合突出重点",
       "titleChip": "#f7bf3c",
       "titleChipText": "#355070",
       "gradientStart": "#ffd966",
