@@ -1,0 +1,77 @@
+{
+  "_comment": "Presentation PDF Generator Configuration",
+  "pdf": {
+    "format": "A4",
+    "landscape": true,
+    "printBackground": true,
+    "margin": {
+      "top": "0",
+      "right": "0",
+      "bottom": "0",
+      "left": "0"
+    }
+  },
+  "viewport": {
+    "width": 1404,
+    "height": 993
+  },
+  "browser": {
+    "headless": true,
+    "defaultTimeout": 30
+  },
+  "themes": {
+    "blue": {
+      "name": "海洋蓝",
+      "titleChip": "#2eaee9",
+      "gradientStart": "#62d8ff",
+      "gradientMid": "#3ebff0",
+      "gradientEnd": "#2596cf"
+    },
+    "orange": {
+      "name": "珊瑚橙",
+      "titleChip": "#ff8a5b",
+      "gradientStart": "#ffb347",
+      "gradientMid": "#ff9f5a",
+      "gradientEnd": "#ff7f50"
+    },
+    "green": {
+      "name": "清新绿",
+      "titleChip": "#68c98f",
+      "gradientStart": "#7dd78a",
+      "gradientMid": "#5bc97d",
+      "gradientEnd": "#45b669"
+    },
+    "yellow": {
+      "name": "阳光黄",
+      "titleChip": "#f7bf3c",
+      "titleChipText": "#355070",
+      "gradientStart": "#ffd966",
+      "gradientMid": "#f7bf3c",
+      "gradientEnd": "#e5a820"
+    }
+  },
+  "typography": {
+    "fontFamily": "PingFang SC, Hiragino Sans GB, Microsoft YaHei, Noto Sans SC, sans-serif",
+    "titleSize": "30px",
+    "enTitleSize": "26px",
+    "bodyCnSize": "31px",
+    "bodyEnSize": "24px",
+    "minTitleSize": "28px",
+    "minBodySize": "22px"
+  },
+  "layout": {
+    "pageWidth": "297mm",
+    "pageHeight": "210mm",
+    "gridGap": "15mm",
+    "padding": "18mm 18mm 28mm 18mm",
+    "borderRadius": {
+      "page": "30px",
+      "card": "24px",
+      "image": "24px"
+    }
+  },
+  "quality": {
+    "maxFileSizeMB": 50,
+    "imageDpi": 150
+  }
+}
