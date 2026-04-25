@@ -51,12 +51,17 @@ function loadConfig() {
       printBackground: true,
       margin: { top: '0', right: '0', bottom: '0', left: '0' }
     },
-    quality: { maxFileSizeMB: 50 }
+    quality: { maxFileSizeMB: 50 },
+    output: { defaultDir: process.env.HOME ? path.join(process.env.HOME, 'Downloads') : process.cwd() }
   };
 
   if (fs.existsSync(configPath)) {
     try {
       const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      // Expand ~ in output directory
+      if (config.output && config.output.defaultDir) {
+        config.output.defaultDir = config.output.defaultDir.replace(/^~/, process.env.HOME || '');
+      }
       return { ...defaultConfig, ...config };
     } catch (e) {
       console.warn(`Warning: Could not load config.json: ${e.message}`);
@@ -71,7 +76,6 @@ const CONFIG = loadConfig();
 // Parse command line arguments
 const args = process.argv.slice(2);
 const htmlPath = args[0];
-const pdfPath = args[1] || (htmlPath ? htmlPath.replace('.html', '.pdf') : null);
 
 let viewport = { ...CONFIG.viewport };
 let debugMode = false;
@@ -80,6 +84,22 @@ let timeout = CONFIG.browser.defaultTimeout * 1000;
 let pdfFormat = CONFIG.pdf;
 let contentType = null;
 let autoTheme = false;
+let outputDir = CONFIG.output.defaultDir;
+let customPdfPath = null;
+
+// Parse options first (so --output-dir is known before building default filename)
+args.slice(1).forEach(arg => {
+  if (arg.startsWith('--output-dir')) {
+    const [, value] = arg.split('=');
+    if (value) outputDir = value.replace(/^~/, process.env.HOME || '');
+  } else if (arg.startsWith('--output=')) {
+    const [, value] = arg.split('=');
+    if (value) customPdfPath = value.replace(/^~/, process.env.HOME || '');
+  }
+});
+
+const defaultPdfName = htmlPath ? path.basename(htmlPath, '.html') + '.pdf' : null;
+const finalPdfPath = customPdfPath || path.join(outputDir, defaultPdfName || 'output.pdf');
 
 args.forEach(arg => {
   if (arg === '--debug' || arg === '-d') {
@@ -117,7 +137,7 @@ args.forEach(arg => {
 });
 
 if (!htmlPath) {
-  console.error('Usage: node generate-pdf.js <input.html> [output.pdf] [options]');
+  console.error('Usage: node generate-pdf.js <input.html> [options]');
   console.error('Options:');
   console.error('  --debug              Enable debug mode (saves screenshot on failure)');
   console.error('  --self-test          Run self-tests after generation (PASS/FAIL report)');
@@ -125,21 +145,36 @@ if (!htmlPath) {
   console.error('  --viewport=WxH       Set viewport dimensions (default: 1404x993)');
   console.error('  --content-type=TYPE  Specify content type for auto theme selection');
   console.error('  --auto-theme         Auto detect content type from HTML');
+  console.error('  --output-dir=DIR     Set output directory (default: ~/Downloads)');
+  console.error('  --output=PATH        Set full output path (overrides --output-dir)');
   console.error('  --config             Display current configuration');
   console.error('');
   console.error('Content Types: cover, intro, main, highlight, nature, education, data, summary, thankyou');
   console.error('');
   console.error('Examples:');
-  console.error('  node generate-pdf.js presentation.html output.pdf');
-  console.error('  node generate-pdf.js presentation.html output.pdf --content-type=education');
-  console.error('  node generate-pdf.js presentation.html output.pdf --self-test');
-  console.error('  node generate-pdf.js presentation.html output.pdf --self-test --debug');
+  console.error('  node generate-pdf.js presentation.html');
+  console.error('  node generate-pdf.js presentation.html --output-dir=./output');
+  console.error('  node generate-pdf.js presentation.html --output=./my-presentation.pdf');
+  console.error('  node generate-pdf.js presentation.html --content-type=education --self-test');
+  console.error('  node generate-pdf.js presentation.html --auto-theme --debug');
   process.exit(1);
 }
 
 // Resolve absolute paths
 const htmlAbsPath = path.resolve(htmlPath);
-const pdfAbsPath = path.resolve(pdfPath);
+const pdfAbsPath = path.resolve(finalPdfPath);
+
+// Create output directory if needed
+const outputDirAbs = path.dirname(pdfAbsPath);
+if (fs.existsSync(outputDirAbs)) {
+  if (!fs.statSync(outputDirAbs).isDirectory()) {
+    console.error(`Error: Output directory exists but is not a directory: ${outputDirAbs}`);
+    process.exit(1);
+  }
+} else {
+  fs.mkdirSync(outputDirAbs, { recursive: true });
+  console.log(`Created output directory: ${outputDirAbs}`);
+}
 
 if (!fs.existsSync(htmlAbsPath)) {
   console.error(`Error: Input file not found: ${htmlAbsPath}`);
@@ -148,6 +183,7 @@ if (!fs.existsSync(htmlAbsPath)) {
 
 console.log(`Generating PDF from: ${htmlAbsPath}`);
 console.log(`Output PDF: ${pdfAbsPath}`);
+console.log(`Output directory: ${outputDirAbs}`);
 console.log(`Viewport: ${viewport.width}x${viewport.height}`);
 
 (async () => {

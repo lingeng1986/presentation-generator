@@ -141,5 +141,9 @@
   "quality": {
     "maxFileSizeMB": 50,
     "imageDpi": 150
+  },
+  "output": {
+    "defaultDir": "~/Downloads",
+    "description": "Default directory for generated PDFs. Can be overridden with --output-dir or --output flags."
   }
 }

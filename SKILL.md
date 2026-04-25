@@ -61,7 +61,15 @@ Examples:
 ### Step 3: Generate PDF
 
 ```bash
-node scripts/generate-pdf.js input.html output.pdf
+node scripts/generate-pdf.js input.html
+```
+
+PDF is saved to `~/Downloads` by default (configurable in `config.json`).
+
+**Output options:**
+```bash
+node scripts/generate-pdf.js input.html --output-dir=./output
+node scripts/generate-pdf.js input.html --output=./custom/path/my-slides.pdf
 ```
 
 PDF naming follows same convention:
@@ -758,12 +766,14 @@ Generates PDF from HTML using Playwright/Chromium.
 
 **Usage:**
 ```bash
-node generate-pdf.js input.html output.pdf
-node generate-pdf.js input.html output.pdf --viewport 1404x993
-node generate-pdf.js input.html output.pdf --debug
-node generate-pdf.js input.html output.pdf --timeout=60
-node generate-pdf.js input.html output.pdf --content-type=education
-node generate-pdf.js input.html output.pdf --auto-theme
+node generate-pdf.js input.html
+node generate-pdf.js input.html --viewport 1404x993
+node generate-pdf.js input.html --debug
+node generate-pdf.js input.html --timeout=60
+node generate-pdf.js input.html --content-type=education
+node generate-pdf.js input.html --auto-theme
+node generate-pdf.js input.html --output-dir=./output
+node generate-pdf.js input.html --output=./custom/slides.pdf
 node generate-pdf.js --config  # Display current configuration
 ```
 
@@ -776,6 +786,8 @@ node generate-pdf.js --config  # Display current configuration
 | `--viewport=WxH` | Set viewport dimensions | 1404x993 |
 | `--content-type=TYPE` | Force theme based on content type (see below) | auto |
 | `--auto-theme` / `-a` | Auto-detect theme from HTML content | off |
+| `--output-dir=DIR` | Set output directory for PDF | ~/Downloads |
+| `--output=PATH` | Set full output path (overrides --output-dir) | - |
 | `--config` / `-c` | Display current configuration from config.json | - |
 
 **Content Types & Themes:**
@@ -829,7 +841,8 @@ The skill supports a `config.json` file for customizing default values.
     "titleSize": "30px",
     "minTitleSize": "28px"
   },
-  "quality": { "maxFileSizeMB": 50 }
+  "quality": { "maxFileSizeMB": 50 },
+  "output": { "defaultDir": "~/Downloads" }
 }
 ```
 
@@ -855,12 +868,14 @@ playwright install chromium
 
 | Task | Command |
 |------|---------|
-| Generate PDF | `node scripts/generate-pdf.js input.html output.pdf` |
-| Generate with self-test | `node scripts/generate-pdf.js input.html output.pdf --self-test` |
-| Generate with debug | `node scripts/generate-pdf.js input.html output.pdf --debug` |
-| Auto theme selection | `node scripts/generate-pdf.js input.html output.pdf --auto-theme` |
-| Specify content type | `node scripts/generate-pdf.js input.html output.pdf --content-type=education` |
-| Self-test + auto theme | `node scripts/generate-pdf.js input.html output.pdf --self-test --auto-theme` |
+| Generate PDF | `node scripts/generate-pdf.js input.html` |
+| Generate to specific dir | `node scripts/generate-pdf.js input.html --output-dir=./output` |
+| Generate with self-test | `node scripts/generate-pdf.js input.html --self-test` |
+| Generate with debug | `node scripts/generate-pdf.js input.html --debug` |
+| Auto theme selection | `node scripts/generate-pdf.js input.html --auto-theme` |
+| Specify content type | `node scripts/generate-pdf.js input.html --content-type=education` |
+| Full output path | `node scripts/generate-pdf.js input.html --output=./slides.pdf` |
+| Self-test + auto theme | `node scripts/generate-pdf.js input.html --self-test --auto-theme` |
 | New version | Copy HTML, rename with timestamp |
 | AI Check (Claude) | `claude --print "Check PDF: /path/to/file.pdf"` |
 | AI Check (script) | `./scripts/check-pdf.sh slides.pdf requirements.txt` |
@@ -874,7 +889,7 @@ playwright install chromium
 Run automatic quality checks after PDF generation:
 
 ```bash
-node scripts/generate-pdf.js input.html output.pdf --self-test
+node scripts/generate-pdf.js input.html --self-test
 ```
 
 ### What Self-Test Checks
@@ -953,12 +968,15 @@ node scripts/generate-pdf.js input.html output.pdf --self-test
 cp template.html slides_20260424_0900_v1.html
 # ... edit content ...
 
-# Generate PDF
-node scripts/generate-pdf.js slides_20260424_0900_v1.html slides_20260424_0900_v1.pdf
+# Generate PDF (saved to ~/Downloads by default)
+node scripts/generate-pdf.js slides_20260424_0900_v1.html
+
+# Or save to specific directory
+node scripts/generate-pdf.js slides_20260424_0900_v1.html --output-dir=./output
 
 # AI Check (Claude CLI)
 claude --print --permission-mode bypassPermissions \
-  "Check this PDF: /path/to/slides_20260424_0900_v1.pdf"
+  "Check this PDF: ~/Downloads/slides_20260424_0900_v1.pdf"
 # → Claude reports: "Text too small on page 3"
 
 # Fix issue
@@ -966,15 +984,15 @@ cp slides_20260424_0900_v1.html slides_20260424_1030_v2_fixed_text.html
 # ... edit CSS, increase font size ...
 
 # Generate v2
-node scripts/generate-pdf.js slides_20260424_1030_v2.html slides_20260424_1030_v2.pdf
+node scripts/generate-pdf.js slides_20260424_1030_v2.html --output-dir=./output
 
 # Re-check with Claude
 claude --print --permission-mode bypassPermissions \
-  "Check this PDF: /path/to/slides_20260424_1030_v2.pdf"
+  "Check this PDF: ./output/slides_20260424_1030_v2.pdf"
 # → Claude: "All checks pass"
 
 # Manual check
-open slides_20260424_1030_v2.pdf
+open ./output/slides_20260424_1030_v2.pdf
 # → Looks good, colors correct, images load
 
 # Deliver to client
@@ -987,8 +1005,8 @@ cp slides_20260424_1030_v2.html slides_20260424_1145_v3_client_edits.html
 # ... make edits per feedback ...
 
 # Generate and check
-node scripts/generate-pdf.js slides_20260424_1145_v3.html slides_20260424_1145_v3.pdf
-./scripts/check-pdf.sh slides_20260424_1145_v3.pdf requirements.txt
+node scripts/generate-pdf.js slides_20260424_1145_v3.html --output-dir=./output
+./scripts/check-pdf.sh ./output/slides_20260424_1145_v3.pdf requirements.txt
 
 # If checks pass → deliver
 # If fails → fix, save as v4, regenerate, re-check
@@ -998,7 +1016,7 @@ node scripts/generate-pdf.js slides_20260424_1145_v3.html slides_20260424_1145_v
 
 # After approval
 cp slides_20260424_1145_v3.html slides_20260424_1430_final.html
-cp slides_20260424_1145_v3.pdf slides_20260424_1430_final.pdf
+cp ./output/slides_20260424_1145_v3.pdf slides_20260424_1430_final.pdf
 
 # Archive all versions
 mkdir -p versions/{v1,v2,v3,final}
